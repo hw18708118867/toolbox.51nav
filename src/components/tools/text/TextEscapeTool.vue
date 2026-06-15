@@ -11,7 +11,7 @@
       </template>
       <template #tab-1>
         <div class="space-y-4">
-          <TextInput v-model="unescapeInput" label="输入文本" :placeholder="'请输入要反转义的文本（如 \\\\n \\\\t \\\\\"）'" :rows="10" show-count />
+          <TextInput v-model="unescapeInput" label="输入文本" placeholder="请输入要反转义的文本（如 \n \t 等）" :rows="10" show-count />
           <div class="flex items-center gap-3">
           </div>
           <TextOutput v-model="unescapeOutput" label="反转义结果" :rows="10" />
