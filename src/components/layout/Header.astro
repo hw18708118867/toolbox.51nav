@@ -1,0 +1,118 @@
+---
+import ThemeToggle from './ThemeToggle.vue';
+
+const navLinks = [
+  { label: '首页', href: '/' },
+  { label: '编码', href: '/tools/encoding/' },
+  { label: '加密', href: '/tools/encryption/' },
+  { label: '哈希', href: '/tools/hashing/' },
+  { label: '文本', href: '/tools/text/' },
+  { label: 'JSON', href: '/tools/data-format/' },
+  { label: '网络', href: '/tools/network/' },
+  { label: '安全', href: '/tools/security/' },
+  { label: '转换', href: '/tools/converter/' },
+  { label: '教程', href: '/tutorials/' },
+];
+---
+
+<header
+  class="sticky top-0 z-50"
+  style="
+    background: var(--glass-strong);
+    backdrop-filter: blur(40px) saturate(200%);
+    -webkit-backdrop-filter: blur(40px) saturate(200%);
+    border-bottom: 1px solid var(--glass-border);
+  "
+>
+  <div class="max-w-[1400px] mx-auto px-5 h-[64px] flex items-center justify-between">
+    <!-- Logo -->
+    <a href="/" class="flex items-center gap-2.5 no-underline shrink-0 group">
+      <div
+        class="w-9 h-9 rounded-xl flex items-center justify-center text-white font-bold text-sm transition-all duration-500 group-hover:scale-105 group-hover:shadow-lg"
+        style="background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-accent) 100%);"
+      >
+        D
+      </div>
+      <span class="text-base font-semibold tracking-tight" style="color: var(--color-text);">
+        开发工具箱
+      </span>
+    </a>
+
+    <!-- Desktop Nav -->
+    <nav class="hidden lg:flex items-center gap-0.5">
+      {navLinks.map((link) => (
+        <a
+          href={link.href}
+          class="relative px-3.5 py-2 rounded-xl text-[13px] font-medium no-underline transition-all duration-300"
+          style="color: var(--color-text-secondary);"
+        >
+          {link.label}
+        </a>
+      ))}
+    </nav>
+
+    <!-- Right side -->
+    <div class="flex items-center gap-1">
+      <a
+        href="/#tool-search"
+        class="hidden sm:flex items-center gap-2 px-3 py-2 rounded-xl text-[13px] font-medium no-underline transition-all duration-300"
+        style="color: var(--color-text-secondary);"
+      >
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+          <circle cx="11" cy="11" r="8" />
+          <path d="m21 21-4.35-4.35" />
+        </svg>
+        <span class="hidden xl:inline">搜索</span>
+      </a>
+
+      <ThemeToggle client:load />
+
+      <!-- Mobile menu button -->
+      <button
+        id="mobile-menu-btn"
+        class="lg:hidden p-2.5 rounded-xl transition-all duration-300"
+        style="color: var(--color-text-secondary);"
+        aria-label="菜单"
+      >
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+          <path d="M4 6h16" />
+          <path d="M4 12h16" />
+          <path d="M4 18h16" />
+        </svg>
+      </button>
+    </div>
+  </div>
+
+  <!-- Mobile Nav -->
+  <div
+    id="mobile-menu"
+    class="hidden lg:hidden"
+    style="
+      background: var(--glass-strong);
+      backdrop-filter: blur(40px) saturate(200%);
+      -webkit-backdrop-filter: blur(40px) saturate(200%);
+      border-bottom: 1px solid var(--glass-border);
+    "
+  >
+    <nav class="max-w-[1400px] mx-auto px-4 py-4 grid grid-cols-3 gap-2">
+      {navLinks.map((link) => (
+        <a
+          href={link.href}
+          class="px-4 py-3 rounded-xl text-center text-sm font-medium no-underline transition-all duration-300 active:scale-95"
+          style="color: var(--color-text-secondary);"
+        >
+          {link.label}
+        </a>
+      ))}
+    </nav>
+  </div>
+</header>
+
+<script>
+  const btn = document.getElementById('mobile-menu-btn');
+  const menu = document.getElementById('mobile-menu');
+  btn?.addEventListener('click', () => {
+    menu?.classList.toggle('hidden');
+    btn.style.transform = menu?.classList.contains('hidden') ? 'rotate(0deg)' : 'rotate(90deg)';
+  });
+</script>

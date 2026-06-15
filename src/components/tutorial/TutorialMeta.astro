@@ -1,0 +1,57 @@
+---
+import { categories } from '../../data/categories';
+
+export interface Props {
+  date: Date;
+  category: string;
+  wordCount?: number;
+}
+
+const { date, category, wordCount } = Astro.props;
+const catInfo = categories.find(c => c.id === category);
+const categoryName = catInfo?.name || category;
+const readingTime = wordCount ? Math.max(1, Math.ceil(wordCount / 400)) : 5;
+const formattedDate = date.toLocaleDateString('zh-CN', { year: 'numeric', month: 'long', day: 'numeric' });
+---
+
+<div class="tutorial-meta">
+  <a href={`/tutorials/?category=${category}`} class="meta-category" style="background: var(--color-primary-light); color: var(--color-primary);">
+    {categoryName}
+  </a>
+  <span class="meta-date" style="color: var(--color-text-muted);">
+    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+    {formattedDate}
+  </span>
+  <span class="meta-reading" style="color: var(--color-text-muted);">
+    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+    约 {readingTime} 分钟阅读
+  </span>
+</div>
+
+<style>
+  .tutorial-meta {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    flex-wrap: wrap;
+    margin-bottom: 1.5rem;
+  }
+  .meta-category {
+    font-size: 0.75rem;
+    font-weight: 500;
+    padding: 0.2rem 0.6rem;
+    border-radius: 20px;
+    text-decoration: none;
+    transition: opacity 0.2s;
+  }
+  .meta-category:hover {
+    opacity: 0.8;
+  }
+  .meta-date,
+  .meta-reading {
+    font-size: 0.75rem;
+    display: flex;
+    align-items: center;
+    gap: 0.3rem;
+  }
+</style>

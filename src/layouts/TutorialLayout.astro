@@ -1,0 +1,370 @@
+---
+import BaseLayout from './BaseLayout.astro';
+import Breadcrumb from '../components/layout/Breadcrumb.astro';
+import AdSlot from '../components/layout/AdSlot.astro';
+import TableOfContents from '../components/tutorial/TableOfContents.astro';
+import TutorialMeta from '../components/tutorial/TutorialMeta.astro';
+import TryToolCTA from '../components/tutorial/TryToolCTA.astro';
+import RelatedTutorials from '../components/tutorial/RelatedTutorials.astro';
+import { categories } from '../data/categories';
+import { getToolById, getToolsByCategory } from '../data/tools-registry';
+import type { CollectionEntry } from 'astro:content';
+
+interface Props {
+  tutorial: CollectionEntry<'tutorials'>;
+  relatedTutorialsData: { title: string; toolId: string; category: string; description: string; }[];
+}
+
+const { tutorial, relatedTutorialsData = [] } = Astro.props;
+const { data } = tutorial;
+const { Content, headings } = await tutorial.render();
+
+const catInfo = categories.find(c => c.id === data.category);
+const categoryName = catInfo?.name || data.category;
+
+const breadcrumbItems = [
+  { label: '首页', href: '/' },
+  { label: '教程', href: '/tutorials/' },
+  { label: categoryName, href: `/tutorials/?category=${data.category}` },
+  { label: data.title },
+];
+
+const tool = getToolById(data.toolId);
+
+// Estimate word count
+const renderedBody = await tutorial.render();
+const bodyText = String(renderedBody.Content);
+// Rough word count: Chinese chars + whitespace-separated words
+const chineseChars = (bodyText.match(/[一-鿿]/g) || []).length;
+const englishWords = (bodyText.match(/[a-zA-Z]+/g) || []).length;
+const estimatedWordCount = chineseChars + englishWords;
+
+// JSON-LD Article schema
+const jsonLd = {
+  "@context": "https://schema.org",
+  "@type": "Article",
+  "headline": data.title,
+  "description": data.description,
+  "author": {
+    "@type": "Organization",
+    "name": data.author,
+  },
+  "datePublished": new Date(data.date).toISOString(),
+  "dateModified": data.updated ? new Date(data.updated).toISOString() : new Date(data.date).toISOString(),
+  "mainEntityOfPage": {
+    "@type": "WebPage",
+    "@id": Astro.url.href,
+  },
+  "publisher": {
+    "@type": "Organization",
+    "name": "开发工具箱",
+    "logo": {
+      "@type": "ImageObject",
+      "url": "https://webtools.pages.dev/favicon.svg",
+    },
+  },
+  "about": tool ? { "@type": "SoftwareApplication", "name": tool.name } : undefined,
+  "keywords": data.keywords.join(','),
+};
+
+const fullTitle = `${data.title} — 开发工具箱`;
+---
+
+<BaseLayout
+  title={fullTitle}
+  description={data.description}
+  keywords={data.keywords.join(',')}
+>
+  <div class="tutorial-page">
+    <div class="tutorial-main">
+      <!-- Breadcrumb -->
+      <div class="tutorial-breadcrumb">
+        <Breadcrumb items={breadcrumbItems} />
+      </div>
+
+      <!-- Article Header -->
+      <article class="tutorial-article">
+        <h1 class="tutorial-h1">{data.title}</h1>
+        <TutorialMeta date={new Date(data.date)} category={data.category} wordCount={estimatedWordCount} />
+
+        <!-- Article Body -->
+        <div class="tutorial-content">
+          <Content />
+        </div>
+
+        <!-- Related tools -->
+        {tool && (
+          <div class="tutorial-related-tools">
+            <h3 class="related-tools-heading" style="color: var(--color-text);">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/>
+                <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/>
+              </svg>
+              相关工具
+            </h3>
+            <div class="flex flex-wrap gap-2">
+              {(tool.related || []).map((relatedId: string) => {
+                const relatedTool = getToolById(relatedId);
+                if (!relatedTool) return null;
+                return (
+                  <a href={`/tools/${relatedTool.category}/${relatedTool.id}`}
+                     class="text-xs px-3 py-1.5 rounded-xl no-underline transition-all duration-300 hover:scale-105"
+                     style="background: var(--glass-light); color: var(--color-text-secondary);">
+                    {relatedTool.name}
+                  </a>
+                );
+              })}
+            </div>
+            {/* Also link the primary tool */}
+            <div class="flex flex-wrap gap-2 mt-2">
+              <a href={`/tools/${tool.category}/${tool.id}`}
+                 class="text-xs px-3 py-1.5 rounded-xl no-underline transition-all duration-300 hover:scale-105"
+                 style="background: var(--color-primary-light); color: var(--color-primary);">
+                {tool.name}（在线使用）
+              </a>
+            </div>
+          </div>
+        )}
+
+        <!-- Related Tutorials -->
+        <RelatedTutorials tutorials={relatedTutorialsData} />
+      </article>
+    </div>
+
+    <!-- Sidebar -->
+    <aside class="tutorial-sidebar">
+      <div class="tutorial-sidebar-inner">
+        <TableOfContents />
+        <TryToolCTA toolId={data.toolId} />
+        <div class="tutorial-sidebar-ad mt-4">
+          <AdSlot position="sidebar" />
+        </div>
+      </div>
+    </aside>
+  </div>
+
+  <!-- JSON-LD -->
+  <script type="application/ld+json" set:html={JSON.stringify(jsonLd)}></script>
+
+  <!-- Canonical -->
+  <link rel="canonical" href={Astro.url.href} />
+</BaseLayout>
+
+<style>
+  .tutorial-page {
+    display: flex;
+    gap: 2.5rem;
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 1.5rem;
+  }
+
+  .tutorial-main {
+    flex: 1;
+    min-width: 0;
+    padding-bottom: 3rem;
+  }
+
+  .tutorial-breadcrumb {
+    margin-bottom: 1.5rem;
+    padding-top: 1rem;
+  }
+
+  .tutorial-article {
+    max-width: 100%;
+  }
+
+  .tutorial-h1 {
+    font-size: 1.75rem;
+    font-weight: 800;
+    line-height: 1.35;
+    color: var(--color-text);
+    margin-bottom: 0.75rem;
+    letter-spacing: -0.02em;
+  }
+
+  .tutorial-sidebar {
+    width: 260px;
+    flex-shrink: 0;
+    display: block;
+  }
+
+  .tutorial-sidebar-inner {
+    position: sticky;
+    top: calc(var(--header-height) + 1.5rem);
+    background: var(--color-bg);
+    border-radius: var(--radius-md);
+    padding: 0.25rem;
+  }
+
+  .tutorial-related-tools {
+    margin-top: 3rem;
+    padding-top: 2rem;
+    border-top: 1px solid var(--color-border);
+  }
+
+  .related-tools-heading {
+    font-size: 0.9375rem;
+    font-weight: 600;
+    margin-bottom: 0.75rem;
+    display: flex;
+    align-items: center;
+    gap: 0.375rem;
+  }
+
+  .tutorial-sidebar-ad {
+    margin-top: 1.5rem;
+  }
+
+  /* Article Content Styles */
+  .tutorial-content :global(h2) {
+    font-size: 1.375rem;
+    font-weight: 700;
+    margin-top: 2.5rem;
+    margin-bottom: 1rem;
+    color: var(--color-text);
+    scroll-margin-top: calc(var(--header-height) + 1rem);
+  }
+
+  .tutorial-content :global(h3) {
+    font-size: 1.125rem;
+    font-weight: 600;
+    margin-top: 1.75rem;
+    margin-bottom: 0.75rem;
+    color: var(--color-text);
+    scroll-margin-top: calc(var(--header-height) + 1rem);
+  }
+
+  .tutorial-content :global(p) {
+    font-size: 0.9375rem;
+    line-height: 1.85;
+    color: var(--color-text-secondary);
+    margin-bottom: 1.25rem;
+  }
+
+  .tutorial-content :global(ul),
+  .tutorial-content :global(ol) {
+    margin-bottom: 1.25rem;
+    padding-left: 1.5rem;
+  }
+
+  .tutorial-content :global(li) {
+    font-size: 0.9375rem;
+    line-height: 1.8;
+    color: var(--color-text-secondary);
+    margin-bottom: 0.5rem;
+  }
+
+  .tutorial-content :global(strong) {
+    color: var(--color-text);
+    font-weight: 600;
+  }
+
+  .tutorial-content :global(a) {
+    color: var(--color-primary);
+    text-decoration: underline;
+    text-underline-offset: 2px;
+  }
+
+  .tutorial-content :global(a:hover) {
+    color: var(--color-primary-hover);
+  }
+
+  .tutorial-content :global(blockquote) {
+    border-left: 3px solid var(--color-primary);
+    padding: 0.75rem 1.25rem;
+    margin: 1.5rem 0;
+    background: var(--glass-light);
+    border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+  }
+
+  .tutorial-content :global(blockquote p) {
+    margin-bottom: 0;
+    font-style: italic;
+  }
+
+  .tutorial-content :global(table) {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 1.5rem 0;
+    font-size: 0.875rem;
+  }
+
+  .tutorial-content :global(th) {
+    text-align: left;
+    font-weight: 600;
+    padding: 0.6rem 0.75rem;
+    font-size: 0.8125rem;
+    color: var(--color-text);
+    border-bottom: 2px solid var(--color-border);
+    background: var(--glass-light);
+  }
+
+  .tutorial-content :global(td) {
+    padding: 0.5rem 0.75rem;
+    border-bottom: 1px solid var(--color-border);
+    color: var(--color-text-secondary);
+  }
+
+  .tutorial-content :global(tr:hover td) {
+    background: var(--glass-light);
+  }
+
+  .tutorial-content :global(pre) {
+    background: var(--tutorial-code-bg);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md);
+    padding: 1.25rem;
+    margin: 1.5rem 0;
+    overflow-x: auto;
+    position: relative;
+  }
+
+  .tutorial-content :global(pre code) {
+    font-size: 0.8125rem;
+    line-height: 1.7;
+    background: none;
+    border: none;
+    padding: 0;
+    color: var(--tutorial-code-text);
+  }
+
+  .tutorial-content :global(:not(pre) > code) {
+    font-size: 0.8125rem;
+    background: var(--tutorial-inline-code-bg);
+    padding: 0.125rem 0.375rem;
+    border-radius: 6px;
+    border: 1px solid var(--color-border);
+    color: var(--tutorial-inline-code-text);
+    white-space: nowrap;
+  }
+
+  .tutorial-content :global(hr) {
+    border: none;
+    border-top: 1px solid var(--color-border);
+    margin: 2rem 0;
+  }
+
+  /* Mobile */
+  @media (max-width: 1024px) {
+    .tutorial-sidebar {
+      display: none;
+    }
+    .tutorial-page {
+      padding: 0 1rem;
+    }
+    .tutorial-h1 {
+      font-size: 1.375rem;
+    }
+    .tutorial-content :global(h2) {
+      font-size: 1.2rem;
+    }
+    .tutorial-content :global(h3) {
+      font-size: 1rem;
+    }
+    .tutorial-content :global(p),
+    .tutorial-content :global(li) {
+      font-size: 0.875rem;
+    }
+  }
+</style>

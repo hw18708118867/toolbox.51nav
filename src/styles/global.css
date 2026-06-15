@@ -1,0 +1,450 @@
+@import "tailwindcss";
+
+/* ============================================
+   Liquid Glass · 液态玻璃设计系统
+   Apple-style frosted glass aesthetic
+   ============================================ */
+
+/* ---- CSS 变量 ---- */
+:root {
+  /* 背景色 — 偏暖的极浅灰，Apple 风格 */
+  --color-bg: #f5f5f7;
+  --color-bg-secondary: #eeeef2;
+  --color-bg-canvas: #f0f0f4;
+  --color-bg-tertiary: rgba(0, 0, 0, 0.03);
+
+  /* 边框 */
+  --color-border: rgba(0, 0, 0, 0.08);
+  --color-border-hover: rgba(0, 0, 0, 0.14);
+
+  /* 玻璃层 — 半透明，让背景光斑穿透 */
+  --glass-strong: rgba(255, 255, 255, 0.48);
+  --glass-medium: rgba(255, 255, 255, 0.32);
+  --glass-light: rgba(255, 255, 255, 0.18);
+
+  /* 玻璃边框 — 微妙的白色边缘高光 */
+  --glass-border: rgba(255, 255, 255, 0.5);
+  --glass-border-subtle: rgba(0, 0, 0, 0.04);
+
+  /* 输入框专用玻璃层 */
+  --glass-input: rgba(255, 255, 255, 0.35);
+  --glass-input-focus: rgba(255, 255, 255, 0.55);
+
+  /* 文字 — 增强对比度，提升可读性 */
+  --color-text: #1d1d1f;
+  --color-text-secondary: #515154;
+  --color-text-muted: #86868b;
+
+  /* 强调色 — Apple 蓝 */
+  --color-primary: #0071e3;
+  --color-primary-hover: #0077ed;
+  --color-primary-light: rgba(0, 113, 227, 0.10);
+
+  /* 辅助色 */
+  --color-accent: #5e5ce6;
+  --color-accent-light: rgba(94, 92, 230, 0.08);
+  --color-success: #34c759;
+  --color-warning: #ff9f0a;
+  --color-error: #ff3b30;
+
+  /* 光斑颜色 — 蓝/紫/青/靛，科技感色调 */
+  --orb-blue: rgba(64, 156, 255, 0.25);
+  --orb-purple: rgba(120, 100, 255, 0.22);
+  --orb-teal: rgba(80, 220, 240, 0.20);
+  --orb-cyan: rgba(0, 200, 240, 0.22);
+
+  /* 教程代码块和行内代码 */
+  --tutorial-code-bg: #f6f8fa;
+  --tutorial-code-text: #1d1d1f;
+  --tutorial-inline-code-bg: #e8e8ed;
+  --tutorial-inline-code-text: #5e5ce6;
+
+  /* 阴影 — 柔和的层叠投影 */
+  --shadow-xs: 0 1px 2px rgba(0, 0, 0, 0.04);
+  --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.04), 0 1px 2px rgba(0, 0, 0, 0.06);
+  --shadow-md: 0 8px 24px rgba(0, 0, 0, 0.06), 0 2px 8px rgba(0, 0, 0, 0.04);
+  --shadow-lg: 0 16px 48px rgba(0, 0, 0, 0.08), 0 4px 12px rgba(0, 0, 0, 0.04);
+  --shadow-xl: 0 24px 64px rgba(0, 0, 0, 0.10), 0 8px 24px rgba(0, 0, 0, 0.06);
+
+  /* 圆角 */
+  --radius-sm: 12px;
+  --radius-md: 16px;
+  --radius-lg: 20px;
+  --radius-xl: 24px;
+
+  --header-height: 64px;
+  --sidebar-width: 260px;
+}
+
+/* ---- 暗色模式 ---- */
+[data-theme="dark"] {
+  --color-bg: #0a0a0a;
+  --color-bg-secondary: #1c1c1e;
+  --color-bg-canvas: #0d0d0d;
+  --color-bg-tertiary: rgba(255, 255, 255, 0.04);
+
+  --color-border: rgba(255, 255, 255, 0.08);
+  --color-border-hover: rgba(255, 255, 255, 0.14);
+
+  --glass-strong: rgba(28, 28, 30, 0.50);
+  --glass-medium: rgba(28, 28, 30, 0.35);
+  --glass-light: rgba(28, 28, 30, 0.20);
+
+  --glass-input: rgba(28, 28, 30, 0.35);
+  --glass-input-focus: rgba(28, 28, 30, 0.55);
+
+  --glass-border: rgba(255, 255, 255, 0.14);
+  --glass-border-subtle: rgba(255, 255, 255, 0.06);
+
+  --color-text: #f5f5f7;
+  --color-text-secondary: #c5c5cb;
+  --color-text-muted: #8e8e93;
+
+  --color-primary: #2997ff;
+  --color-primary-hover: #40a9ff;
+  --color-primary-light: rgba(41, 151, 255, 0.15);
+
+  --color-accent: #7d7aff;
+  --color-accent-light: rgba(125, 122, 255, 0.12);
+
+  --orb-blue: rgba(80, 180, 255, 0.28);
+  --orb-purple: rgba(140, 120, 255, 0.25);
+  --orb-teal: rgba(100, 230, 250, 0.22);
+  --orb-cyan: rgba(0, 210, 250, 0.25);
+
+  /* 教程代码块和行内代码 — 暗色模式 */
+  --tutorial-code-bg: #1a1a22;
+  --tutorial-code-text: #e0e0e8;
+  --tutorial-inline-code-bg: #23232a;
+  --tutorial-inline-code-text: #9d9aff;
+
+  --shadow-xs: 0 1px 2px rgba(0, 0, 0, 0.2);
+  --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.3), 0 1px 2px rgba(0, 0, 0, 0.4);
+  --shadow-md: 0 8px 24px rgba(0, 0, 0, 0.4), 0 2px 8px rgba(0, 0, 0, 0.3);
+  --shadow-lg: 0 16px 48px rgba(0, 0, 0, 0.5), 0 4px 12px rgba(0, 0, 0, 0.35);
+  --shadow-xl: 0 24px 64px rgba(0, 0, 0, 0.6), 0 8px 24px rgba(0, 0, 0, 0.4);
+}
+
+/* ============================================
+   动画关键帧
+   ============================================ */
+@keyframes orb-float-1 {
+  0%, 100% { transform: translate(0, 0) scale(1); }
+  25%  { transform: translate(8%, -6%) scale(1.05); }
+  50%  { transform: translate(-4%, -12%) scale(0.95); }
+  75%  { transform: translate(-8%, 4%) scale(1.03); }
+}
+
+@keyframes orb-float-2 {
+  0%, 100% { transform: translate(0, 0) scale(1); }
+  33%  { transform: translate(-6%, -10%) scale(1.04); }
+  66%  { transform: translate(10%, 6%) scale(0.96); }
+}
+
+@keyframes orb-float-3 {
+  0%, 100% { transform: translate(0, 0) scale(1); }
+  50%  { transform: translate(4%, -8%) scale(1.06); }
+}
+
+@keyframes orb-float-4 {
+  0%, 100% { transform: translate(0, 0) scale(1); }
+  40%  { transform: translate(-10%, 4%) scale(0.97); }
+  80%  { transform: translate(6%, -4%) scale(1.03); }
+}
+
+/* ============================================
+   全局样式
+   ============================================ */
+html {
+  scroll-behavior: smooth;
+  -webkit-text-size-adjust: 100%;
+}
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Segoe UI", Roboto,
+    "Helvetica Neue", Arial, "Noto Sans SC", "PingFang SC", "Microsoft YaHei", sans-serif;
+  background-color: var(--color-bg-canvas);
+  color: var(--color-text);
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  position: relative;
+  overflow-x: hidden;
+  min-height: 100vh;
+  transition: background-color 0.5s ease, color 0.5s ease;
+}
+
+/* ---- 液态光斑背景容器 ---- */
+.liquid-orbs {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  overflow: hidden;
+}
+
+.liquid-orb {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(120px);
+  will-change: transform;
+}
+
+.liquid-orb-1 {
+  width: 600px;
+  height: 600px;
+  background: var(--orb-blue);
+  top: -200px;
+  left: -100px;
+  animation: orb-float-1 25s ease-in-out infinite;
+}
+
+.liquid-orb-2 {
+  width: 500px;
+  height: 500px;
+  background: var(--orb-purple);
+  top: 40%;
+  right: -150px;
+  animation: orb-float-2 30s ease-in-out infinite;
+}
+
+.liquid-orb-3 {
+  width: 450px;
+  height: 450px;
+  background: var(--orb-teal);
+  bottom: -150px;
+  left: 30%;
+  animation: orb-float-3 28s ease-in-out infinite;
+}
+
+.liquid-orb-4 {
+  width: 350px;
+  height: 350px;
+  background: var(--orb-cyan);
+  top: 20%;
+  left: 50%;
+  animation: orb-float-4 22s ease-in-out infinite;
+}
+
+/* 确保内容在光斑之上 */
+body > * {
+  position: relative;
+  z-index: 1;
+}
+
+/* ============================================
+   液态玻璃卡片系统
+   ============================================ */
+
+/* 标准玻璃卡 */
+.glass-card {
+  background: var(--glass-strong);
+  backdrop-filter: blur(40px) saturate(200%);
+  -webkit-backdrop-filter: blur(40px) saturate(200%);
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-sm);
+  transition: all 0.4s cubic-bezier(0.25, 0.1, 0.25, 1);
+}
+
+.glass-card:hover {
+  box-shadow: var(--shadow-lg), 0 0 0 1px rgba(0, 113, 227, 0.15);
+  transform: translateY(-4px);
+}
+
+/* 轻玻璃卡 — 更透明的变体 */
+.glass-card-light {
+  background: var(--glass-medium);
+  backdrop-filter: blur(30px) saturate(180%);
+  -webkit-backdrop-filter: blur(30px) saturate(180%);
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-xs);
+  transition: all 0.4s cubic-bezier(0.25, 0.1, 0.25, 1);
+}
+
+.glass-card-light:hover {
+  background: var(--glass-strong);
+  box-shadow: var(--shadow-md), 0 0 0 1px rgba(0, 113, 227, 0.12);
+  transform: translateY(-3px);
+}
+
+/* 无 hover 抬升的玻璃面板（工具区、内容区） */
+.glass-panel {
+  background: var(--glass-strong);
+  backdrop-filter: blur(40px) saturate(200%);
+  -webkit-backdrop-filter: blur(40px) saturate(200%);
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-sm);
+}
+
+/* 暗色模式微调 */
+[data-theme="dark"] .glass-card,
+[data-theme="dark"] .glass-panel {
+  border-color: var(--glass-border);
+}
+
+/* ============================================
+   交互元素
+   ============================================ */
+a {
+  transition: color 0.3s cubic-bezier(0.25, 0.1, 0.25, 1),
+              background-color 0.3s cubic-bezier(0.25, 0.1, 0.25, 1),
+              box-shadow 0.3s cubic-bezier(0.25, 0.1, 0.25, 1),
+              transform 0.3s cubic-bezier(0.25, 0.1, 0.25, 1);
+}
+
+button {
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.25, 0.1, 0.25, 1);
+}
+
+button:disabled {
+  cursor: not-allowed;
+  opacity: 0.4;
+}
+
+button:active:not(:disabled) {
+  transform: scale(0.97);
+}
+
+/* 工具区操作按钮 */
+.btn-primary {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.375rem;
+  padding: 0.5rem 1.25rem;
+  border-radius: var(--radius-sm);
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: white;
+  border: none;
+  background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-accent) 100%);
+  box-shadow: 0 2px 8px rgba(0, 113, 227, 0.25);
+  transition: all 0.3s cubic-bezier(0.25, 0.1, 0.25, 1);
+}
+
+.btn-primary:hover {
+  box-shadow: 0 4px 16px rgba(0, 113, 227, 0.35);
+  transform: translateY(-1px);
+}
+
+.btn-primary:active {
+  transform: scale(0.97);
+}
+
+/* 输入框 — 玻璃质感 */
+input, textarea, select {
+  transition: all 0.3s cubic-bezier(0.25, 0.1, 0.25, 1);
+  border-radius: var(--radius-sm);
+  background: var(--glass-input);
+  border: 1px solid var(--color-border);
+  color: var(--color-text);
+}
+
+input:focus, textarea:focus, select:focus {
+  outline: none;
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 3px var(--color-primary-light);
+  background: var(--glass-input-focus);
+}
+
+/* textarea 专属 */
+textarea {
+  backdrop-filter: blur(20px) saturate(180%);
+  -webkit-backdrop-filter: blur(20px) saturate(180%);
+}
+
+textarea:read-only {
+  background: var(--glass-medium);
+  backdrop-filter: blur(30px) saturate(200%);
+  -webkit-backdrop-filter: blur(30px) saturate(200%);
+  cursor: default;
+}
+
+/* ============================================
+   工具输入输出
+   ============================================ */
+.tool-input,
+.tool-output {
+  font-family: "SF Mono", "Cascadia Code", "Fira Code", "JetBrains Mono", "Source Code Pro", monospace;
+  font-size: 0.875rem;
+  line-height: 1.6;
+  tab-size: 4;
+}
+
+/* ============================================
+   滚动条 — 极简
+   ============================================ */
+::-webkit-scrollbar {
+  width: 5px;
+  height: 5px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--color-text-muted);
+  border-radius: 10px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--color-text-secondary);
+}
+
+/* ============================================
+   等宽字体
+   ============================================ */
+pre, code {
+  font-family: "SF Mono", "Cascadia Code", "Fira Code", "JetBrains Mono", "Source Code Pro", monospace;
+}
+
+/* ============================================
+   选择框
+   ============================================ */
+select {
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%238e8e93' stroke-width='2'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 10px center;
+  padding-right: 30px;
+}
+
+/* ============================================
+   选中文字
+   ============================================ */
+::selection {
+  background-color: var(--color-primary);
+  color: white;
+}
+
+/* ============================================
+   渐变文字工具类
+   ============================================ */
+.text-gradient {
+  background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-accent) 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* ============================================
+   移动端
+   ============================================ */
+@media (max-width: 768px) {
+  .tool-input,
+  .tool-output {
+    font-size: 0.8rem;
+  }
+
+  textarea {
+    font-size: 16px;
+  }
+
+  .liquid-orb {
+    opacity: 0.6;
+  }
+}

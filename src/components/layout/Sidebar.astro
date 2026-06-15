@@ -1,0 +1,176 @@
+---
+import { categories } from '../../data/categories';
+import { getToolsByCategory } from '../../data/tools-registry';
+
+interface Props {
+  currentCategory?: string;
+  currentTool?: string;
+}
+
+const { currentCategory, currentTool } = Astro.props;
+---
+
+<aside class="glass-panel overflow-hidden sidebar-nav" style="border-radius: var(--radius-lg);">
+  <div class="px-4 py-3.5" style="border-bottom: 1px solid var(--glass-border);">
+    <h2 class="text-sm font-semibold flex items-center gap-2" style="color: var(--color-text);">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg>
+      工具分类
+    </h2>
+  </div>
+  <nav id="sidebar-scroll" class="max-h-[calc(100vh-220px)] overflow-y-auto py-1">
+    {categories.map((cat) => {
+      const isActive = cat.id === currentCategory;
+      const catTools = getToolsByCategory(cat.id);
+      return (
+        <div>
+          <!-- 一级分类 -->
+          <a
+            href={`/tools/${cat.id}/`}
+            class:list={[
+              'sidebar-cat flex items-center gap-2.5 px-4 py-2.5 text-[13px] no-underline mx-1.5 rounded-lg',
+              isActive ? 'sidebar-cat--active' : '',
+            ]}
+          >
+            <span class="truncate">{cat.name}</span>
+            <span class="ml-auto text-[11px] px-1.5 py-0.5 rounded-md font-medium shrink-0 badge"
+              class:list={[isActive ? 'badge--active' : '']}>
+              {catTools.length}
+            </span>
+          </a>
+
+          <!-- 二级工具列表 — 仅展开当前分类 -->
+          {isActive && catTools.length > 0 && (
+            <div class="pb-2 pt-0.5">
+              {catTools.map((tool) => {
+                const isCurrentTool = currentTool === tool.id;
+                return (
+                  <a
+                    href={`/tools/${cat.id}/${tool.id}`}
+                    class:list={[
+                      'sidebar-tool flex items-center gap-1.5 px-4 py-2 pl-10 text-[12px] no-underline relative',
+                      isCurrentTool ? 'sidebar-tool--active' : '',
+                    ]}
+                  >
+                    {isCurrentTool && (
+                      <span class="absolute left-3.5 top-1/2 -translate-y-1/2 w-1 h-4 rounded-full indicator-dot"></span>
+                    )}
+                    <span class="truncate">{tool.name}</span>
+                  </a>
+                );
+              })}
+            </div>
+          )}
+        </div>
+      );
+    })}
+    <!-- 教程入口 -->
+    <div class="px-4 py-3.5 mt-1" style="border-top: 1px solid var(--glass-border);">
+      <a href="/tutorials/" class="sidebar-cat flex items-center gap-2.5 mx-0 px-0 py-0 rounded-lg no-underline" style="color: var(--color-text-secondary);">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+          <path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/>
+          <path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/>
+        </svg>
+        <span class="text-sm font-semibold">技术教程</span>
+      </a>
+    </div>
+  </nav>
+</aside>
+
+<style>
+  /* 一级分类 — 默认 */
+  .sidebar-cat {
+    color: var(--color-text-secondary);
+    background: transparent;
+    transition: all 0.25s ease;
+  }
+  .sidebar-cat:hover {
+    background: var(--glass-light);
+    color: var(--color-text);
+  }
+
+  /* 一级分类 — 激活 */
+  .sidebar-cat--active {
+    color: var(--color-primary);
+    background: var(--color-primary-light);
+    font-weight: 600;
+  }
+  .sidebar-cat--active:hover {
+    background: var(--color-primary-light);
+    color: var(--color-primary);
+  }
+
+  /* Badge */
+  .badge {
+    background: var(--glass-light);
+    color: var(--color-text-muted);
+  }
+  .badge--active {
+    background: var(--color-primary);
+    color: white;
+  }
+
+  /* 二级工具 — 默认 */
+  .sidebar-tool {
+    color: var(--color-text-secondary);
+    background: transparent;
+    transition: all 0.25s ease;
+  }
+  .sidebar-tool:hover {
+    background: var(--glass-light);
+    color: var(--color-text);
+  }
+
+  /* 二级工具 — 激活 */
+  .sidebar-tool--active {
+    color: var(--color-primary);
+    background: var(--color-primary-light);
+    font-weight: 600;
+  }
+  .sidebar-tool--active:hover {
+    background: var(--color-primary-light);
+    color: var(--color-primary);
+  }
+
+  /* 激活指示点 */
+  .indicator-dot {
+    background: var(--color-primary);
+  }
+</style>
+
+<script>
+  // 侧边栏滚动位置持久化 — 避免每次导航都滚回顶部
+  (function() {
+    const STORAGE_KEY = 'sidebar-scroll-top';
+    const nav = document.getElementById('sidebar-scroll');
+    if (!nav) return;
+
+    // 1. 恢复上次的滚动位置
+    const savedTop = sessionStorage.getItem(STORAGE_KEY);
+    if (savedTop !== null) {
+      nav.scrollTop = parseInt(savedTop, 10);
+    } else {
+      // 2. 首次访问：将当前激活的工具项滚动到可见区域
+      const activeTool = nav.querySelector('.sidebar-tool--active');
+      if (activeTool) {
+        activeTool.scrollIntoView({ block: 'center', behavior: 'instant' });
+      }
+    }
+
+    // 3. 滚动时实时保存位置
+    let scrollTimer;
+    nav.addEventListener('scroll', () => {
+      clearTimeout(scrollTimer);
+      scrollTimer = setTimeout(() => {
+        sessionStorage.setItem(STORAGE_KEY, String(nav.scrollTop));
+      }, 50);
+    }, { passive: true });
+
+    // 4. 点击链接时立即保存位置（在页面跳转前）
+    nav.addEventListener('click', (e) => {
+      const link = e.target.closest('a');
+      if (link && link.href) {
+        sessionStorage.setItem(STORAGE_KEY, String(nav.scrollTop));
+      }
+    });
+  })();
+</script>

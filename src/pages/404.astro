@@ -1,0 +1,33 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+---
+
+<BaseLayout
+  title="页面未找到"
+  description="抱歉，您访问的页面不存在。请检查网址或返回首页。">
+  <div class="max-w-[600px] mx-auto px-5 py-32 text-center">
+    <div class="text-7xl font-extrabold mb-4 text-gradient">404</div>
+    <h1 class="text-xl font-bold mb-3" style="color: var(--color-text);">页面未找到</h1>
+    <p class="text-sm mb-8 leading-relaxed" style="color: var(--color-text-secondary);">
+      您访问的页面可能已被移动、删除，或者您输入的网址有误。
+    </p>
+    <div class="flex flex-col sm:flex-row gap-3 justify-center">
+      <a
+        href="/"
+        class="inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-xl text-sm font-medium no-underline text-white"
+        style="background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-accent) 100%); box-shadow: 0 2px 8px rgba(0,113,227,0.25);"
+      >
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+        返回首页
+      </a>
+      <a
+        href="/tools/"
+        class="inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-xl text-sm font-medium no-underline transition-all duration-300"
+        style="background: var(--glass-medium); backdrop-filter: blur(30px); -webkit-backdrop-filter: blur(30px); color: var(--color-text-secondary); border: 1px solid var(--glass-border);"
+      >
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="2" y="3" width="20" height="14" rx="2" ry="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
+        浏览工具
+      </a>
+    </div>
+  </div>
+</BaseLayout>

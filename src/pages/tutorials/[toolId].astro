@@ -1,0 +1,30 @@
+---
+import { getCollection } from 'astro:content';
+import TutorialLayout from '../../layouts/TutorialLayout.astro';
+
+export async function getStaticPaths() {
+  const tutorials = await getCollection('tutorials');
+  return tutorials.map((entry) => ({
+    params: { toolId: entry.data.toolId },
+    props: { tutorial: entry },
+  }));
+}
+
+const { tutorial } = Astro.props;
+
+// Load all tutorials for cross-referencing
+const allTutorials = await getCollection('tutorials');
+
+// Build related tutorials data
+const relatedSlugs = tutorial.data.relatedTutorials || [];
+const relatedTutorialsData = allTutorials
+  .filter((t) => relatedSlugs.includes(t.data.toolId))
+  .map((t) => ({
+    title: t.data.title,
+    toolId: t.data.toolId,
+    category: t.data.category,
+    description: t.data.description,
+  }));
+---
+
+<TutorialLayout tutorial={tutorial} relatedTutorialsData={relatedTutorialsData} />

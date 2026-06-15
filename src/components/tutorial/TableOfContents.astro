@@ -1,0 +1,112 @@
+---
+export interface Heading { depth: number; text: string; slug: string; }
+---
+
+<script>
+  // 提取页面所有 H2/H3 标题并生成目录
+  function buildToc(): Heading[] {
+    const headings: Heading[] = [];
+    const elements = document.querySelectorAll('.tutorial-content h2, .tutorial-content h3');
+    elements.forEach((el) => {
+      const depth = el.tagName === 'H2' ? 2 : 3;
+      const text = el.textContent || '';
+      const slug = el.id || text.toLowerCase().replace(/[^a-z0-9一-龥]+/g, '-').replace(/(^-|-$)/g, '');
+      headings.push({ depth, text, slug });
+    });
+    return headings;
+  }
+
+  function onMount() {
+    const headings = buildToc();
+    if (headings.length === 0) return;
+    const container = document.getElementById('toc-list');
+    if (!container) return;
+
+    headings.forEach((h) => {
+      const a = document.createElement('a');
+      a.href = `#${h.slug}`;
+      a.className = h.depth === 3 ? 'toc-item toc-h3' : 'toc-item toc-h2';
+      a.textContent = h.text;
+      a.addEventListener('click', (e) => {
+        e.preventDefault();
+        const target = document.getElementById(h.slug);
+        if (target) {
+          target.scrollIntoView({ behavior: 'smooth' });
+          history.pushState(null, '', `#${h.slug}`);
+        }
+      });
+      container.appendChild(a);
+    });
+
+    // Scroll spy
+    const tocItems = container.querySelectorAll('.toc-item');
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          const id = entry.target.id;
+          const link = container.querySelector(`a[href="#${id}"]`);
+          if (link) {
+            if (entry.isIntersecting) {
+              tocItems.forEach((el) => el.classList.remove('toc-active'));
+              link.classList.add('toc-active');
+            }
+          }
+        });
+      },
+      { rootMargin: '-80px 0px -70% 0px' }
+    );
+
+    document.querySelectorAll('.tutorial-content h2[id], .tutorial-content h3[id]').forEach((el) => {
+      observer.observe(el);
+    });
+  }
+
+  // Execute on mount
+  onMount();
+</script>
+
+<nav class="toc-nav">
+  <h4 class="toc-title">目录</h4>
+  <div id="toc-list" class="toc-list"></div>
+</nav>
+
+<style>
+  .toc-nav {
+    /* sticky 由父容器 .tutorial-sidebar-inner 统一处理，避免嵌套 sticky 导致重叠 */
+  }
+  .toc-title {
+    font-size: 0.75rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    margin-bottom: 0.75rem;
+    color: var(--color-text-muted);
+  }
+  .toc-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+    border-left: 1px solid var(--color-border);
+    padding-left: 0.75rem;
+  }
+  .toc-list .toc-item {
+    font-size: 0.8125rem;
+    line-height: 1.5;
+    text-decoration: none;
+    color: var(--color-text-muted);
+    transition: color 0.2s ease;
+    display: block;
+    padding: 0.15rem 0;
+  }
+  .toc-list .toc-item:hover {
+    color: var(--color-primary);
+  }
+  .toc-list .toc-item.toc-active {
+    color: var(--color-primary);
+    font-weight: 500;
+  }
+  .toc-list .toc-item.toc-h3 {
+    padding-left: 0.75rem;
+    font-size: 0.75rem;
+  }
+</style>

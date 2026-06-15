@@ -1,0 +1,258 @@
+---
+import { getCollection } from 'astro:content';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import { categories } from '../../data/categories';
+
+const allTutorials = await getCollection('tutorials');
+
+// Sort by date descending
+const sortedTutorials = allTutorials.sort(
+  (a, b) => new Date(b.data.date).getTime() - new Date(a.data.date).getTime()
+);
+
+// Get category counts
+const categoryCounts: Record<string, number> = {};
+for (const t of allTutorials) {
+  categoryCounts[t.data.category] = (categoryCounts[t.data.category] || 0) + 1;
+}
+
+const pageTitle = '技术教程 — 开发工具箱';
+const pageDesc = '深入理解各种开发工具背后的技术原理：编码、加密、哈希、正则表达式……没有废话，全是内功。';
+---
+
+<BaseLayout title={pageTitle} description={pageDesc} keywords="技术教程,编程原理,编码,加密,哈希,正则表达式">
+  <div class="tutorials-page">
+    <!-- Hero -->
+    <div class="tutorials-hero">
+      <h1 class="tutorials-hero-title">技术教程</h1>
+      <p class="tutorials-hero-desc">{pageDesc}</p>
+      <p class="tutorials-hero-count" style="color: var(--color-text-muted);">
+        目前已收录 <strong style="color: var(--color-primary);">{allTutorials.length}</strong> 篇教程
+      </p>
+    </div>
+
+    <!-- Category Tabs -->
+    {allTutorials.length > 0 && (
+      <div class="tutorials-filters" id="tutorial-filters">
+        <a href="?category=all" class="filter-chip filter-active" data-cat="all">
+          全部（{allTutorials.length}）
+        </a>
+        {categories
+          .filter((c) => categoryCounts[c.id])
+          .sort((a, b) => (categoryCounts[b.id] || 0) - (categoryCounts[a.id] || 0))
+          .map((cat) => (
+            <a href={`?category=${cat.id}`} class="filter-chip" data-cat={cat.id}>
+              {cat.name}（{categoryCounts[cat.id]}）
+            </a>
+          ))}
+      </div>
+    )}
+
+    <!-- Tutorial Grid -->
+    {allTutorials.length === 0 ? (
+      <div class="tutorials-empty">
+        <p style="color: var(--color-text-muted);">教程正在编写中，敬请期待...</p>
+      </div>
+    ) : (
+      <div class="tutorials-grid" id="tutorial-grid">
+        {sortedTutorials.map((t) => {
+          const cat = categories.find((c) => c.id === t.data.category);
+          const readingTime = Math.max(1, Math.ceil(1500 / 400)); // ~5 min fallback
+          return (
+            <a
+              href={`/tutorials/${t.data.toolId}`}
+              class="tutorial-card glass-card no-underline"
+              data-category={t.data.category}
+            >
+              <div class="tutorial-card-badge" style="background: var(--color-primary-light); color: var(--color-primary);">
+                {cat?.name || t.data.category}
+              </div>
+              <h3 class="tutorial-card-title" style="color: var(--color-text);">{t.data.title}</h3>
+              <p class="tutorial-card-desc" style="color: var(--color-text-muted);">{t.data.description}</p>
+              <div class="tutorial-card-footer">
+                <span class="tutorial-card-date" style="color: var(--color-text-muted);">
+                  {new Date(t.data.date).toLocaleDateString('zh-CN', { year: 'numeric', month: 'long', day: 'numeric' })}
+                </span>
+                <span class="tutorial-card-read" style="color: var(--color-text-muted);">约 {readingTime} 分钟</span>
+              </div>
+            </a>
+          );
+        })}
+      </div>
+    )}
+  </div>
+</BaseLayout>
+
+<script>
+  // Client-side category filtering
+  function initFilters() {
+    const filterChips = document.querySelectorAll('.filter-chip');
+    const cards = document.querySelectorAll('.tutorial-card');
+    if (!filterChips.length) return;
+
+    // Read initial category from URL
+    const params = new URLSearchParams(window.location.search);
+    const initialCat = params.get('category') || 'all';
+
+    function applyFilter(cat: string) {
+      filterChips.forEach((chip) => {
+        const el = chip as HTMLElement;
+        el.classList.toggle('filter-active', el.dataset.cat === cat);
+      });
+      cards.forEach((card) => {
+        const el = card as HTMLElement;
+        const cardCat = el.dataset.category;
+        el.style.display = (cat === 'all' || cardCat === cat) ? '' : 'none';
+      });
+      // Update URL without reload
+      const url = new URL(window.location.href);
+      if (cat === 'all') {
+        url.searchParams.delete('category');
+      } else {
+        url.searchParams.set('category', cat);
+      }
+      history.replaceState({}, '', url.toString());
+    }
+
+    applyFilter(initialCat);
+
+    filterChips.forEach((chip) => {
+      chip.addEventListener('click', (e) => {
+        e.preventDefault();
+        const cat = (chip as HTMLElement).dataset.cat || 'all';
+        applyFilter(cat);
+      });
+    });
+  }
+
+  initFilters();
+</script>
+
+<style>
+  .tutorials-page {
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 2rem 1.5rem 4rem;
+  }
+
+  .tutorials-hero {
+    text-align: center;
+    padding: 2.5rem 0 2rem;
+  }
+
+  .tutorials-hero-title {
+    font-size: 2rem;
+    font-weight: 800;
+    color: var(--color-text);
+    margin-bottom: 0.75rem;
+    letter-spacing: -0.03em;
+  }
+
+  .tutorials-hero-desc {
+    font-size: 1rem;
+    color: var(--color-text-secondary);
+    max-width: 560px;
+    margin: 0 auto 0.75rem;
+    line-height: 1.7;
+  }
+
+  .tutorials-hero-count {
+    font-size: 0.8125rem;
+  }
+
+  .tutorials-filters {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    justify-content: center;
+    margin-bottom: 2rem;
+  }
+
+  .filter-chip {
+    font-size: 0.8125rem;
+    padding: 0.4rem 0.9rem;
+    border-radius: 20px;
+    text-decoration: none;
+    transition: all 0.2s ease;
+    background: var(--glass-light);
+    color: var(--color-text-muted);
+    border: 1px solid transparent;
+  }
+
+  .filter-chip:hover {
+    color: var(--color-text);
+    border-color: var(--color-border);
+  }
+
+  .filter-chip.filter-active {
+    background: var(--color-primary);
+    color: #fff;
+    border-color: var(--color-primary);
+  }
+
+  .tutorials-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(330px, 1fr));
+    gap: 1rem;
+  }
+
+  .tutorial-card {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    padding: 1.5rem;
+    border-radius: var(--radius-lg);
+    transition: all 0.4s cubic-bezier(0.25, 0.1, 0.25, 1);
+  }
+
+  .tutorial-card:hover {
+    transform: translateY(-4px);
+  }
+
+  .tutorial-card-badge {
+    font-size: 0.6875rem;
+    font-weight: 500;
+    padding: 0.15rem 0.5rem;
+    border-radius: 10px;
+    width: fit-content;
+  }
+
+  .tutorial-card-title {
+    font-size: 1.0625rem;
+    font-weight: 700;
+    line-height: 1.45;
+    margin: 0;
+  }
+
+  .tutorial-card-desc {
+    font-size: 0.8125rem;
+    line-height: 1.6;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    flex: 1;
+  }
+
+  .tutorial-card-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding-top: 0.25rem;
+    font-size: 0.75rem;
+  }
+
+  .tutorials-empty {
+    text-align: center;
+    padding: 4rem 1rem;
+  }
+
+  @media (max-width: 768px) {
+    .tutorials-hero-title {
+      font-size: 1.5rem;
+    }
+    .tutorials-grid {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>

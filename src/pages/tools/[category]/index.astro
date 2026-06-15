@@ -1,0 +1,16 @@
+---
+import CategoryLayout from '../../../layouts/CategoryLayout.astro';
+import { categories } from '../../../data/categories';
+import { getToolsByCategory } from '../../../data/tools-registry';
+
+export function getStaticPaths() {
+  return categories.map((cat) => ({
+    params: { category: cat.id },
+    props: { category: cat, tools: getToolsByCategory(cat.id) },
+  }));
+}
+
+const { category, tools } = Astro.props;
+---
+
+<CategoryLayout category={category} tools={tools} />

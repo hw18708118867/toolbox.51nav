@@ -1,0 +1,94 @@
+---
+import '../styles/global.css';
+import Header from '../components/layout/Header.astro';
+import Footer from '../components/layout/Footer.astro';
+
+interface Props {
+  title: string;
+  description: string;
+  keywords?: string;
+  ogImage?: string;
+  ogType?: string;
+}
+
+const { title, description, keywords, ogImage, ogType = 'website' } = Astro.props;
+const siteName = '开发工具箱';
+const fullTitle = title === siteName ? title : `${title} - ${siteName}`;
+
+// GA4 — 从环境变量注入，留空则不加载
+const ga4Id = import.meta.env.PUBLIC_GA4_ID || '';
+
+// GSC 验证 — 从环境变量注入，留空则不输出
+const gscVerification = import.meta.env.PUBLIC_GSC_VERIFICATION || '';
+---
+
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content={description} />
+    {keywords && <meta name="keywords" content={keywords} />}
+    <meta name="author" content="开发工具箱" />
+    <title>{fullTitle}</title>
+
+    <!-- Canonical -->
+    <link rel="canonical" href={new URL(Astro.url.pathname, Astro.site).href} />
+
+    <!-- Open Graph -->
+    <meta property="og:title" content={fullTitle} />
+    <meta property="og:description" content={description} />
+    <meta property="og:type" content={ogType} />
+    <meta property="og:url" content={new URL(Astro.url.pathname, Astro.site).href} />
+    <meta property="og:locale" content="zh_CN" />
+    <meta property="og:site_name" content={siteName} />
+    {ogImage ? <meta property="og:image" content={ogImage} /> : <meta property="og:image" content="https://toolbox.51nav.com/og-default.png" />}
+
+    <!-- Twitter Card -->
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content={fullTitle} />
+    <meta name="twitter:description" content={description} />
+
+    <!-- GSC 验证（通过环境变量 PUBLIC_GSC_VERIFICATION 注入） -->
+    {gscVerification && <meta name="google-site-verification" content={gscVerification} />}
+
+    <!-- Favicon -->
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+
+    <!-- Theme Script (prevent flash) -->
+    <script is:inline>
+      (function() {
+        const theme = localStorage.getItem('theme') || 'light';
+        document.documentElement.setAttribute('data-theme', theme);
+      })();
+    </script>
+  </head>
+  <body class="min-h-screen flex flex-col">
+    <!-- 液态光斑背景 -->
+    <div class="liquid-orbs" aria-hidden="true">
+      <div class="liquid-orb liquid-orb-1"></div>
+      <div class="liquid-orb liquid-orb-2"></div>
+      <div class="liquid-orb liquid-orb-3"></div>
+      <div class="liquid-orb liquid-orb-4"></div>
+    </div>
+
+    <Header />
+    <main class="flex-1">
+      <slot />
+    </main>
+    <Footer />
+
+    <!-- Google Analytics 4（通过环境变量 PUBLIC_GA4_ID 注入，留空则不加载） -->
+    {ga4Id && (
+      <script async src={`https://www.googletagmanager.com/gtag/js?id=${ga4Id}`}></script>
+    )}
+    {ga4Id && (
+      <script is:inline>
+        {`window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+        gtag('config', '${ga4Id}');`}
+      </script>
+    )}
+  </body>
+</html>

@@ -1,0 +1,41 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+---
+
+<BaseLayout
+  title="隐私政策"
+  description="开发工具箱隐私政策——我们如何保护您的数据安全，不做数据收集的在线工具箱">
+  <div class="max-w-[760px] mx-auto px-5 py-16">
+    <h1 class="text-2xl font-extrabold mb-2" style="color: var(--color-text);">隐私政策</h1>
+    <p class="text-sm mb-10" style="color: var(--color-text-muted);">最后更新：2026年6月15日</p>
+
+    <div class="prose" style="color: var(--color-text-secondary); line-height: 1.85;">
+
+      <h2 class="text-lg font-semibold mt-8 mb-3" style="color: var(--color-text);">我们到底收不收集你的数据？</h2>
+      <p>一句话说完：<strong>不收</strong>。</p>
+      <p>开发工具箱（toolbox.51nav.com）里所有工具都在你自己的浏览器上跑。你敲进去的文字、上传的文件、生成的密钥、算出来的哈希——这些东西从头到尾没离开过你的电脑，我们也根本看不到。</p>
+      <p>这不是什么高大上的隐私承诺，纯粹是因为这些工具本来就是纯前端代码，不需要服务端参与。说白了你把网页保存到本地离线打开，工具照样能用。</p>
+
+      <h2 class="text-lg font-semibold mt-8 mb-3" style="color: var(--color-text);">那 GA4 统计呢？</h2>
+      <p>我们可能会接入 Google Analytics 4，但它只看一些很粗的统计：今天有多少人访问、大概从哪个地区来的、用的手机还是电脑。你具体在工具里输入了什么内容，GA4 完全不关心也拿不到。</p>
+      <p>如果你实在在意，浏览器里关掉 Cookie 就行，工具功能不受任何影响。</p>
+
+      <h2 class="text-lg font-semibold mt-8 mb-3" style="color: var(--color-text);">localStorage 存了什么？</h2>
+      <p>只有一件事：你选的是浅色还是暗色主题。就这一条，没了。数据留在你浏览器本地，随时可以清掉。</p>
+
+      <h2 class="text-lg font-semibold mt-8 mb-3" style="color: var(--color-text);">Cloudflare 这一层</h2>
+      <p>网站托管在 Cloudflare Pages 上。Cloudflare 作为 CDN 会记录一些基础访问日志（IP、请求时间之类的），这是 CDN 的常规操作，所有托管在 Cloudflare 上的网站都这样。想了解更多可以看 <a href="https://www.cloudflare.com/privacypolicy/" style="color: var(--color-primary);">Cloudflare 的隐私政策</a>。</p>
+
+      <h2 class="text-lg font-semibold mt-8 mb-3" style="color: var(--color-text);">你有啥权利？</h2>
+      <p>因为我们不收集你的个人数据，所以也不存在什么"申请查看我的数据""要求删除我的数据"这种操作——我们手里根本没东西可删。</p>
+      <p>说真的，我见过太多网站嘴上说着"我们重视你的隐私"，然后背后偷偷埋了一堆追踪脚本。这个站简单得很：工具在浏览器里跑，统计只看个数，连用户系统都没有。你的数据自始至终都在你自己手里。</p>
+
+      <h2 class="text-lg font-semibold mt-8 mb-3" style="color: var(--color-text);">政策可能会改</h2>
+      <p>如果以后加了什么新功能，导致隐私策略需要调整，我会更新这个页面。不过核心原则不会变——工具数据不上传，这一点没有商量余地。</p>
+
+      <h2 class="text-lg font-semibold mt-8 mb-3" style="color: var(--color-text);">有问题？</h2>
+      <p>直接发邮件给我就行，不用走什么工单系统：<a href="mailto:miraclehuang611@gmail.com" style="color: var(--color-primary);">miraclehuang611@gmail.com</a>。看到就会回复。</p>
+
+    </div>
+  </div>
+</BaseLayout>

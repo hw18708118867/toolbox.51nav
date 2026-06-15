@@ -1,0 +1,93 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="630" viewBox="0 0 1200 630">
+  <defs>
+    <!-- 液态光斑渐变 -->
+    <radialGradient id="orb-blue" cx="15%" cy="0%" r="50%">
+      <stop offset="0%" stop-color="#409CFF" stop-opacity="0.25" />
+      <stop offset="100%" stop-color="#409CFF" stop-opacity="0" />
+    </radialGradient>
+    <radialGradient id="orb-purple" cx="85%" cy="40%" r="45%">
+      <stop offset="0%" stop-color="#7864FF" stop-opacity="0.22" />
+      <stop offset="100%" stop-color="#7864FF" stop-opacity="0" />
+    </radialGradient>
+    <radialGradient id="orb-teal" cx="50%" cy="100%" r="40%">
+      <stop offset="0%" stop-color="#50DCF0" stop-opacity="0.2" />
+      <stop offset="100%" stop-color="#50DCF0" stop-opacity="0" />
+    </radialGradient>
+    <radialGradient id="orb-cyan" cx="70%" cy="80%" r="30%">
+      <stop offset="0%" stop-color="#00C8F0" stop-opacity="0.18" />
+      <stop offset="100%" stop-color="#00C8F0" stop-opacity="0" />
+    </radialGradient>
+
+    <!-- 文字渐变 -->
+    <linearGradient id="text-gradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#0071e3" />
+      <stop offset="100%" stop-color="#5e5ce6" />
+    </linearGradient>
+
+    <!-- 玻璃面板 -->
+    <linearGradient id="glass-bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#ffffff" stop-opacity="0.55" />
+      <stop offset="100%" stop-color="#ffffff" stop-opacity="0.35" />
+    </linearGradient>
+
+    <!-- 徽章渐变 -->
+    <linearGradient id="badge-grad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#0071e3" stop-opacity="0.12" />
+      <stop offset="100%" stop-color="#5e5ce6" stop-opacity="0.12" />
+    </linearGradient>
+
+    <!-- 背景 -->
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#f5f5f7" />
+      <stop offset="100%" stop-color="#eeeef2" />
+    </linearGradient>
+
+    <filter id="blur-orb" x="-50%" y="-50%" width="200%" height="200%">
+      <feGaussianBlur stdDeviation="80" />
+    </filter>
+  </defs>
+
+  <!-- 背景 -->
+  <rect width="1200" height="630" fill="url(#bg)" />
+
+  <!-- 光斑 -->
+  <circle cx="180" cy="0" r="400" fill="url(#orb-blue)" filter="url(#blur-orb)" />
+  <circle cx="1020" cy="250" r="350" fill="url(#orb-purple)" filter="url(#blur-orb)" />
+  <circle cx="600" cy="630" r="300" fill="url(#orb-teal)" filter="url(#blur-orb)" />
+  <circle cx="840" cy="500" r="200" fill="url(#orb-cyan)" filter="url(#blur-orb)" />
+
+  <!-- 主内容区 -->
+  <g transform="translate(130, 150)">
+    <!-- 徽章 -->
+    <rect x="0" y="0" width="180" height="32" rx="16" fill="url(#badge-grad)" />
+    <text x="90" y="21" text-anchor="middle" font-family="-apple-system, BlinkMacSystemFont, 'PingFang SC', 'Microsoft YaHei', sans-serif" font-size="14" font-weight="500" fill="#0071e3">数据安全 · 本地处理</text>
+
+    <!-- 主标题 -->
+    <text x="0" y="90" font-family="-apple-system, BlinkMacSystemFont, 'PingFang SC', 'Microsoft YaHei', sans-serif" font-size="72" font-weight="800" fill="#1d1d1f" letter-spacing="-2">开发<tspan fill="url(#text-gradient)">工具箱</tspan></text>
+
+    <!-- 副标题 -->
+    <text x="0" y="135" font-family="-apple-system, BlinkMacSystemFont, 'PingFang SC', 'Microsoft YaHei', sans-serif" font-size="28" fill="#515154">170+ 免费在线开发工具 · 一站式搞定</text>
+
+    <!-- 三大特征 -->
+    <g transform="translate(0, 190)">
+      <rect x="0" y="0" width="280" height="72" rx="16" fill="url(#glass-bg)" stroke="#ffffff" stroke-width="1" stroke-opacity="0.6" />
+      <text x="140" y="28" text-anchor="middle" font-family="-apple-system, BlinkMacSystemFont, 'PingFang SC', 'Microsoft YaHei', sans-serif" font-size="16" font-weight="600" fill="#1d1d1f">🔒 数据安全</text>
+      <text x="140" y="52" text-anchor="middle" font-family="-apple-system, BlinkMacSystemFont, 'PingFang SC', 'Microsoft YaHei', sans-serif" font-size="12" fill="#86868b">浏览器本地处理，不上传</text>
+    </g>
+
+    <g transform="translate(304, 190)">
+      <rect x="0" y="0" width="280" height="72" rx="16" fill="url(#glass-bg)" stroke="#ffffff" stroke-width="1" stroke-opacity="0.6" />
+      <text x="140" y="28" text-anchor="middle" font-family="-apple-system, BlinkMacSystemFont, 'PingFang SC', 'Microsoft YaHei', sans-serif" font-size="16" font-weight="600" fill="#1d1d1f">⚡ 无需安装</text>
+      <text x="140" y="52" text-anchor="middle" font-family="-apple-system, BlinkMacSystemFont, 'PingFang SC', 'Microsoft YaHei', sans-serif" font-size="12" fill="#86868b">打开浏览器即可使用</text>
+    </g>
+
+    <g transform="translate(608, 190)">
+      <rect x="0" y="0" width="280" height="72" rx="16" fill="url(#glass-bg)" stroke="#ffffff" stroke-width="1" stroke-opacity="0.6" />
+      <text x="140" y="28" text-anchor="middle" font-family="-apple-system, BlinkMacSystemFont, 'PingFang SC', 'Microsoft YaHei', sans-serif" font-size="16" font-weight="600" fill="#1d1d1f">🆓 完全免费</text>
+      <text x="140" y="52" text-anchor="middle" font-family="-apple-system, BlinkMacSystemFont, 'PingFang SC', 'Microsoft YaHei', sans-serif" font-size="12" fill="#86868b">无注册 · 无限制</text>
+    </g>
+  </g>
+
+  <!-- 底部域名 -->
+  <text x="600" y="595" text-anchor="middle" font-family="-apple-system, BlinkMacSystemFont, 'PingFang SC', 'Microsoft YaHei', sans-serif" font-size="14" fill="#86868b">toolbox.51nav.com</text>
+</svg>

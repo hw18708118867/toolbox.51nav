@@ -1,0 +1,234 @@
+---
+import ToolLayout from '../../../layouts/ToolLayout.astro';
+import { categories } from '../../../data/categories';
+import { getToolById, getToolsByCategory } from '../../../data/tools-registry';
+import { getCollection } from 'astro:content';
+
+export async function getStaticPaths() {
+  const tutorials = await getCollection('tutorials');
+  const tutorialMap = new Map(tutorials.map(t => [t.data.toolId, t]));
+
+  const paths: any[] = [];
+  for (const cat of categories) {
+    const tools = getToolsByCategory(cat.id);
+    for (const tool of tools) {
+      paths.push({
+        params: { category: cat.id, tool: tool.id },
+        props: { tool, category: cat, tutorial: tutorialMap.get(tool.id) || null },
+      });
+    }
+  }
+  return paths;
+}
+
+const { tool, category, tutorial } = Astro.props;
+---
+
+<ToolLayout tool={tool} category={category}>
+  <div slot="tool" id="tool-mount" data-component={tool.component} data-category={tool.category} data-id={tool.id}>
+    <p class="text-center py-8" style="color: var(--color-text-muted);">加载中...</p>
+  </div>
+
+  <div slot="description">
+    <div class="glass-panel p-5 mt-3">
+      <h2 class="text-lg font-bold mb-3 flex items-center gap-2" style="color: var(--color-text);">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+        关于 {tool.name}
+      </h2>
+      <p class="text-sm mb-4 leading-relaxed" style="color: var(--color-text-secondary);">{tool.description}</p>
+      {
+        tool.useCases && tool.useCases.length > 0 && (
+          <>
+            <h3 class="text-sm font-bold mb-2 flex items-center gap-1.5" style="color: var(--color-text);">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+              常见用例
+            </h3>
+            <ul class="text-sm space-y-1.5 mb-5" style="color: var(--color-text-secondary);">
+              {tool.useCases.map(uc => <li>· {uc}</li>)}
+            </ul>
+          </>
+        )
+      }
+      <h3 class="text-sm font-bold mb-2 flex items-center gap-1.5" style="color: var(--color-text);">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>
+        相关工具
+      </h3>
+      <div class="flex flex-wrap gap-2">
+        {(tool.related || []).map((relatedId: string) => {
+          const relatedTool = getToolById(relatedId);
+          if (!relatedTool) return null;
+          return (
+            <a href={`/tools/${relatedTool.category}/${relatedTool.id}`}
+               class="text-xs px-3 py-1.5 rounded-xl no-underline transition-all duration-300 hover:scale-105"
+               style="background: var(--glass-light); color: var(--color-text-secondary);">
+              {relatedTool.name}
+            </a>
+          );
+        })}
+      </div>
+
+      <!-- Tutorial CTA -->
+      {tutorial && (
+        <div class="mt-4 p-4 rounded-xl flex items-start gap-3 border" style="border-color: var(--color-primary-light); background: var(--color-primary-light);">
+          <div class="w-9 h-9 rounded-lg flex items-center justify-center shrink-0 mt-0.5" style="background: var(--color-primary);">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5">
+              <path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/>
+              <path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/>
+            </svg>
+          </div>
+          <div class="flex-1 min-w-0">
+            <p class="text-sm font-semibold mb-0.5" style="color: var(--color-text);">深入了解 {tool.name} 的技术原理</p>
+            <p class="text-xs mb-2" style="color: var(--color-text-muted);">{tutorial.data.description}</p>
+            <a href={`/tutorials/${tool.id}`}
+               class="inline-flex items-center gap-1 text-xs font-medium px-3 py-1.5 rounded-lg no-underline text-white transition-all duration-300 hover:opacity-90"
+               style="background: var(--color-primary);">
+              查看完整教程
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="9 18 15 12 9 6"/></svg>
+            </a>
+          </div>
+        </div>
+      )}
+    </div>
+  </div>
+</ToolLayout>
+
+<script>
+  // 动态加载 Vue 组件 - 避免手动注册 170 个组件
+  (async () => {
+    const mount = document.getElementById('tool-mount');
+    if (!mount) return;
+    const componentName = mount.dataset.component;
+    if (!componentName) return;
+
+    // 组件名 -> 文件路径映射表
+    const pathMap: Record<string, string> = {
+      // 编码解码
+      Base64Tool: 'encoding/Base64Tool.vue', UrlEncodeTool: 'encoding/UrlEncodeTool.vue',
+      HtmlEntityTool: 'encoding/HtmlEntityTool.vue', UnicodeTool: 'encoding/UnicodeTool.vue',
+      HexTool: 'encoding/HexTool.vue', BinaryTool: 'encoding/BinaryTool.vue',
+      JwtDecodeTool: 'encoding/JwtDecodeTool.vue', CharsetConvertTool: 'encoding/CharsetConvertTool.vue',
+      PunycodeTool: 'encoding/PunycodeTool.vue', MorseTool: 'encoding/MorseTool.vue',
+      Base32Tool: 'encoding/Base32Tool.vue', Base58Tool: 'encoding/Base58Tool.vue',
+      Utf8Tool: 'encoding/Utf8Tool.vue', OctalTool: 'encoding/OctalTool.vue',
+      QuotedPrintableTool: 'encoding/QuotedPrintableTool.vue', Base85Tool: 'encoding/Base85Tool.vue',
+      BrailleTool: 'encoding/BrailleTool.vue', TapCodeTool: 'encoding/TapCodeTool.vue',
+      AaencodeTool: 'encoding/AaencodeTool.vue',
+      // 加密解密
+      AesTool: 'encryption/AesTool.vue', DesTool: 'encryption/DesTool.vue',
+      TripleDesTool: 'encryption/TripleDesTool.vue', Rc4Tool: 'encryption/Rc4Tool.vue',
+      RsaTool: 'encryption/RsaTool.vue', RsaKeygenTool: 'encryption/RsaKeygenTool.vue',
+      Sm4Tool: 'encryption/Sm4Tool.vue', Sm2Tool: 'encryption/Sm2Tool.vue',
+      ChaCha20Tool: 'encryption/ChaCha20Tool.vue', BlowfishTool: 'encryption/BlowfishTool.vue',
+      RabbitTool: 'encryption/RabbitTool.vue', PgpTool: 'encryption/PgpTool.vue',
+      AesKeygenTool: 'encryption/AesKeygenTool.vue',
+      // 哈希
+      Md5Tool: 'hashing/Md5Tool.vue', Sha256Tool: 'hashing/Sha256Tool.vue',
+      Sha1Tool: 'hashing/Sha1Tool.vue', Sha512Tool: 'hashing/Sha512Tool.vue',
+      Sha3Tool: 'hashing/Sha3Tool.vue', Sm3Tool: 'hashing/Sm3Tool.vue',
+      HmacTool: 'hashing/HmacTool.vue', HashAllTool: 'hashing/HashAllTool.vue',
+      CrcTool: 'converter/CrcTool.vue', BcryptTool: 'converter/BcryptTool.vue',
+      ScryptTool: 'converter/ScryptTool.vue', Argon2Tool: 'converter/Argon2Tool.vue',
+      HashCompareTool: 'hashing/HashCompareTool.vue', Ripemd160Tool: 'hashing/Ripemd160Tool.vue',
+      // 文本
+      TextCaseTool: 'text/TextCaseTool.vue', TextCountTool: 'text/TextCountTool.vue',
+      TextDiffTool: 'text/TextDiffTool.vue', TextRemoveDupTool: 'text/TextRemoveDupTool.vue',
+      TextRemoveEmptyTool: 'text/TextRemoveEmptyTool.vue', TextTrimTool: 'text/TextTrimTool.vue',
+      TextSortTool: 'text/TextSortTool.vue', TextReplaceTool: 'text/TextReplaceTool.vue',
+      TextReverseTool: 'text/TextReverseTool.vue', TextPrefixTool: 'text/TextPrefixTool.vue',
+      TextExtractTool: 'text/TextExtractTool.vue', TextSplitJoinTool: 'text/TextSplitJoinTool.vue',
+      TextChineseTool: 'text/TextChineseTool.vue', LoremIpsumTool: 'text/LoremIpsumTool.vue',
+      MarkdownPreviewTool: 'text/MarkdownPreviewTool.vue', TextSlugifyTool: 'text/TextSlugifyTool.vue',
+      TextEscapeTool: 'text/TextEscapeTool.vue', TextPadTool: 'text/TextPadTool.vue',
+      TextWrapTool: 'text/TextWrapTool.vue',
+      // 正则
+      RegexTesterTool: 'regex/RegexTesterTool.vue',
+      RegexCheatsheetTool: 'regex/RegexCheatsheetTool.vue', RegexGeneratorTool: 'regex/RegexGeneratorTool.vue',
+      // 数据格式
+      JsonFormatTool: 'data-format/JsonFormatTool.vue', JsonToYamlTool: 'data-format/JsonToYamlTool.vue',
+      YamlToJsonTool: 'data-format/YamlToJsonTool.vue', JsonToXmlTool: 'data-format/JsonToXmlTool.vue',
+      XmlToJsonTool: 'data-format/XmlToJsonTool.vue', CsvToJsonTool: 'data-format/CsvToJsonTool.vue',
+      JsonToCsvTool: 'data-format/JsonToCsvTool.vue', XmlFormatTool: 'data-format/XmlFormatTool.vue',
+      JsonToTomlTool: 'data-format/JsonToTomlTool.vue', TomlToJsonTool: 'data-format/TomlToJsonTool.vue',
+      JsonPathTool: 'data-format/JsonPathTool.vue', JsonDiffTool: 'data-format/JsonDiffTool.vue',
+      JsonSchemaTool: 'data-format/JsonSchemaTool.vue', ProtobufDecodeTool: 'data-format/ProtobufDecodeTool.vue',
+      // 网络
+      IpLookupTool: 'network/IpLookupTool.vue', IpCalcTool: 'network/IpCalcTool.vue',
+      IpConvertTool: 'network/IpConvertTool.vue', UrlParserTool: 'network/UrlParserTool.vue',
+      DnsLookupTool: 'network/DnsLookupTool.vue', CurlGeneratorTool: 'network/CurlGeneratorTool.vue',
+      UserAgentTool: 'network/UserAgentTool.vue', HttpHeadersTool: 'network/HttpHeadersTool.vue',
+      PortReferenceTool: 'network/PortReferenceTool.vue', CidrCalcTool: 'converter/CidrCalcTool.vue',
+      MacLookupTool: 'converter/MacLookupTool.vue', WebsocketTestTool: 'converter/WebsocketTestTool.vue',
+      WhoisTool: 'converter/WhoisTool.vue',
+      // 安全
+      PasswordGenTool: 'security/PasswordGenTool.vue', PasswordStrengthTool: 'security/PasswordStrengthTool.vue',
+      PasswordBreachTool: 'security/PasswordBreachTool.vue', TotpTool: 'security/TotpTool.vue',
+      CertParserTool: 'security/CertParserTool.vue', CsrfTokenTool: 'security/CsrfTokenTool.vue',
+      CspGeneratorTool: 'security/CspGeneratorTool.vue', SecurityHeadersTool: 'security/SecurityHeadersTool.vue',
+      XssPayloadTool: 'security/XssPayloadTool.vue', SqlInjectTool: 'security/SqlInjectTool.vue',
+      SteganographyTool: 'security/SteganographyTool.vue',
+      // 编程转换
+      TimestampTool: 'converter/TimestampTool.vue', RadixTool: 'converter/RadixTool.vue',
+      ColorConvertTool: 'converter/ColorConvertTool.vue', QrGenerateTool: 'converter/QrGenerateTool.vue',
+      UnitConvertTool: 'converter/UnitConvertTool.vue', NumberBaseTool: 'converter/NumberBaseTool.vue',
+      AsciiTableTool: 'converter/AsciiTableTool.vue', UnicodeTableTool: 'converter/UnicodeTableTool.vue',
+      HtmlColorTool: 'converter/HtmlColorTool.vue', QrDecodeTool: 'converter/QrDecodeTool.vue',
+      BarcodeGenTool: 'converter/BarcodeGenTool.vue',
+      // 图片
+      ImageCompressTool: 'image/ImageCompressTool.vue', ImageConvertTool: 'image/ImageConvertTool.vue',
+      ImageBase64Tool: 'image/ImageBase64Tool.vue', ImageMetadataTool: 'image/ImageMetadataTool.vue',
+      ImageResizeTool: 'image/ImageResizeTool.vue', ImageCropTool: 'image/ImageCropTool.vue',
+      ImageWatermarkTool: 'image/ImageWatermarkTool.vue', ImageSplitTool: 'image/ImageSplitTool.vue',
+      SvgOptimizerTool: 'image/SvgOptimizerTool.vue', IcoConvertTool: 'image/IcoConvertTool.vue',
+      FaviconGenTool: 'image/FaviconGenTool.vue',
+      // CSS
+      CssMinifyTool: 'css/CssMinifyTool.vue', CssGradientTool: 'css/CssGradientTool.vue',
+      CssShadowTool: 'css/CssShadowTool.vue', CssFlexboxTool: 'css/CssFlexboxTool.vue',
+      CssGridTool: 'css/CssGridTool.vue', CssAnimationTool: 'css/CssAnimationTool.vue',
+      // JavaScript
+      JsMinifyTool: 'javascript/JsMinifyTool.vue', JsFormatTool: 'javascript/JsFormatTool.vue',
+      JsRunTool: 'javascript/JsRunTool.vue', JsObfuscateTool: 'javascript/JsObfuscateTool.vue',
+      JsBeautifyTool: 'javascript/JsBeautifyTool.vue', JsDeobfuscateTool: 'javascript/JsDeobfuscateTool.vue',
+      BabelTransformTool: 'javascript/BabelTransformTool.vue', TypescriptPlayTool: 'javascript/TypescriptPlayTool.vue',
+      // 生成工具
+      UuidTool: 'generator/UuidTool.vue', FakeDataTool: 'generator/FakeDataTool.vue',
+      UlidTool: 'generator/UlidTool.vue', NanoidTool: 'generator/NanoidTool.vue',
+      RandomStringTool: 'generator/RandomStringTool.vue', RandomNumberTool: 'generator/RandomNumberTool.vue',
+      HashBatchTool: 'generator/HashBatchTool.vue', ChineseLoremTool: 'generator/ChineseLoremTool.vue',
+      // 数学
+      BaseCalculatorTool: 'math/BaseCalculatorTool.vue', BitCalculatorTool: 'math/BitCalculatorTool.vue',
+      MathExpressionTool: 'math/MathExpressionTool.vue', PercentageCalcTool: 'math/PercentageCalcTool.vue',
+      BmiCalcTool: 'math/BmiCalcTool.vue',
+      // 文档
+      JsonToTsTool: 'document/JsonToTsTool.vue', JsonToGoTool: 'document/JsonToGoTool.vue',
+      HtmlToMdTool: 'document/HtmlToMdTool.vue', MdToHtmlTool: 'document/MdToHtmlTool.vue',
+      CsvToSqlTool: 'data-format/CsvToSqlTool.vue', SqlToCsvTool: 'data-format/SqlToCsvTool.vue',
+      JsonToJavaTool: 'document/JsonToJavaTool.vue', JsonToMysqlTool: 'document/JsonToMysqlTool.vue',
+      ExcelToJsonTool: 'document/ExcelToJsonTool.vue', PdfToTextTool: 'document/PdfToTextTool.vue',
+      // 数据分析
+      FrequencyAnalysisTool: 'text/FrequencyAnalysisTool.vue',
+      EntropyCalcTool: 'text/EntropyCalcTool.vue', BaseDetectTool: 'encoding/BaseDetectTool.vue',
+      CharsetDetectTool: 'encoding/CharsetDetectTool.vue', BinaryAnalysisTool: 'security/BinaryAnalysisTool.vue',
+    };
+
+    const relPath = pathMap[componentName];
+    if (!relPath) {
+      mount.innerHTML = '<p class="text-center py-8" style="color: var(--color-text-muted);">该工具正在开发中，敬请期待...</p>';
+      return;
+    }
+
+    try {
+      const { createApp } = await import('vue');
+      const mod = await import(`../../../components/tools/${relPath}`);
+      const Component = mod.default;
+      if (Component) {
+        const app = createApp(Component);
+        mount.innerHTML = '';
+        const wrapper = document.createElement('div');
+        mount.appendChild(wrapper);
+        app.mount(wrapper);
+      }
+    } catch (err) {
+      mount.innerHTML = '<p class="text-center py-8" style="color: var(--color-error);">组件加载失败，请刷新页面重试</p>';
+    }
+  })();
+</script>

@@ -1,0 +1,72 @@
+---
+import BaseLayout from './BaseLayout.astro';
+import Sidebar from '../components/layout/Sidebar.astro';
+import Breadcrumb from '../components/layout/Breadcrumb.astro';
+import AdSlot from '../components/layout/AdSlot.astro';
+import { categories } from '../data/categories';
+import type { ToolDefinition } from '../data/tools-registry';
+
+interface Props {
+  tool: ToolDefinition;
+  category: typeof categories[number];
+}
+
+const { tool, category } = Astro.props;
+const breadcrumbItems = [
+  { label: '首页', href: '/' },
+  { label: category.name, href: `/tools/${category.id}/` },
+  { label: tool.name },
+];
+
+const jsonLd = {
+  "@context": "https://schema.org",
+  "@type": "WebApplication",
+  "name": tool.name,
+  "description": tool.description,
+  "applicationCategory": "DeveloperApplication",
+  "operatingSystem": "Any",
+  "offers": {
+    "@type": "Offer",
+    "price": "0",
+    "priceCurrency": "CNY"
+  }
+};
+---
+
+<BaseLayout title={tool.name} description={tool.description} keywords={tool.keywords.join(',')}>
+  <script type="application/ld+json" set:html={JSON.stringify(jsonLd)} />
+  <link rel="canonical" href={Astro.url.href} />
+
+  <div class="max-w-[1400px] mx-auto px-5 py-6">
+    <Breadcrumb items={breadcrumbItems} />
+
+    <div class="flex flex-col lg:flex-row gap-6 mt-4">
+      <!-- 主内容区 -->
+      <div class="flex-1 min-w-0">
+        <div class="mb-5">
+          <h1 class="text-2xl md:text-3xl font-extrabold tracking-tight" style="color: var(--color-text);">{tool.name}</h1>
+          <p class="mt-2 text-sm" style="color: var(--color-text-secondary);">{tool.description}</p>
+        </div>
+
+        <!-- 工具交互区 — 玻璃面板 -->
+        <div class="glass-panel p-5 md:p-6">
+          <slot name="tool" />
+        </div>
+
+        <AdSlot slot="content-middle" class="mt-6" />
+
+        <div class="mt-6" style="color: var(--color-text);">
+          <slot name="description" />
+        </div>
+
+        <AdSlot slot="content-bottom" class="mt-6" />
+      </div>
+
+      <!-- 侧边栏 -->
+      <aside class="w-full lg:w-[260px] shrink-0">
+        <Sidebar currentCategory={category.id} currentTool={tool.id} />
+        <AdSlot slot="sidebar" class="mt-4" />
+      </aside>
+    </div>
+  </div>
+</BaseLayout>

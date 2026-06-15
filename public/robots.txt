@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://toolbox.51nav.com/sitemap-index.xml

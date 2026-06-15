@@ -1,0 +1,16 @@
+---
+/**
+ * AdSlot 组件 - AdSense 广告占位
+ * 初始阶段显示空占位，AdSense 审批通过后替换为真实广告代码
+ */
+interface Props {
+  slot: string;
+  class?: string;
+}
+
+const { slot: adSlot, class: className } = Astro.props;
+---
+
+<div class:list={['ad-slot', className]} data-ad-slot={adSlot}>
+  <!-- AdSense 广告代码将在审批通过后替换此处 -->
+</div>
