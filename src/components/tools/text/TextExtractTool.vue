@@ -17,7 +17,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue';
+import { ref, watch } from 'vue';
 import TextInput from '../../common/TextInput.vue';
 import TextOutput from '../../common/TextOutput.vue';
 
@@ -49,4 +49,6 @@ function doExtract() {
     extractedCount.value = 0;
   }
 }
+
+watch([input, extractType], doExtract);
 </script>

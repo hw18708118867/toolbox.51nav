@@ -25,8 +25,16 @@ const { tool, category, tutorial } = Astro.props;
 ---
 
 <ToolLayout tool={tool} category={category}>
-  <div slot="tool" id="tool-mount" data-component={tool.component} data-category={tool.category} data-id={tool.id}>
-    <p class="text-center py-8" style="color: var(--color-text-muted);">加载中...</p>
+  <div slot="tool">
+    {category.id === 'security' && (
+      <div class="mb-3 px-4 py-2.5 rounded-lg flex items-center gap-2 text-xs" style="background-color: rgba(239, 68, 68, 0.08); border: 1px solid rgba(239, 68, 68, 0.2); color: #dc2626;">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+        <span>⚠️ 只能用于安全研究，严禁用于任何非法用途，如有违反本站不承担任何责任。</span>
+      </div>
+    )}
+    <div id="tool-mount" data-component={tool.component} data-category={tool.category} data-id={tool.id}>
+      <p class="text-center py-8" style="color: var(--color-text-muted);">加载中...</p>
+    </div>
   </div>
 
   <div slot="description">
@@ -236,6 +244,8 @@ const { tool, category, tutorial } = Astro.props;
       PortReferenceTool: () => import('../../../components/tools/network/PortReferenceTool.vue'),
       UrlParserTool: () => import('../../../components/tools/network/UrlParserTool.vue'),
       UserAgentTool: () => import('../../../components/tools/network/UserAgentTool.vue'),
+      SeoAnalysisTool: () => import('../../../components/tools/network/SeoAnalysisTool.vue'),
+      MultiPingTool: () => import('../../../components/tools/network/MultiPingTool.vue'),
       RegexCheatsheetTool: () => import('../../../components/tools/regex/RegexCheatsheetTool.vue'),
       RegexGeneratorTool: () => import('../../../components/tools/regex/RegexGeneratorTool.vue'),
       RegexTesterTool: () => import('../../../components/tools/regex/RegexTesterTool.vue'),
@@ -249,6 +259,15 @@ const { tool, category, tutorial } = Astro.props;
       SecurityHeadersTool: () => import('../../../components/tools/security/SecurityHeadersTool.vue'),
       SqlInjectTool: () => import('../../../components/tools/security/SqlInjectTool.vue'),
       SteganographyTool: () => import('../../../components/tools/security/SteganographyTool.vue'),
+      ReverseShellTool: () => import('../../../components/tools/security/ReverseShellTool.vue'),
+      LfiPayloadTool: () => import('../../../components/tools/security/LfiPayloadTool.vue'),
+      TtyShellTool: () => import('../../../components/tools/security/TtyShellTool.vue'),
+      MsfvenomTool: () => import('../../../components/tools/security/MsfvenomTool.vue'),
+      LinuxPrivescTool: () => import('../../../components/tools/security/LinuxPrivescTool.vue'),
+      PowershellCommandsTool: () => import('../../../components/tools/security/PowershellCommandsTool.vue'),
+      FileTransferTool: () => import('../../../components/tools/security/FileTransferTool.vue'),
+      WindowsCommandsTool: () => import('../../../components/tools/security/WindowsCommandsTool.vue'),
+      LinuxCommandsTool: () => import('../../../components/tools/security/LinuxCommandsTool.vue'),
       TotpTool: () => import('../../../components/tools/security/TotpTool.vue'),
       XssPayloadTool: () => import('../../../components/tools/security/XssPayloadTool.vue'),
       EntropyCalcTool: () => import('../../../components/tools/text/EntropyCalcTool.vue'),

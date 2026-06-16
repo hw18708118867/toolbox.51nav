@@ -52,14 +52,14 @@ export const categories: Category[] = [
   {
     id: 'network',
     name: '网络工具',
-    description: 'IP 查询、URL 解析、DNS 查询、子网计算',
+    description: 'IP 查询、URL 解析、DNS 查询、多地Ping、SEO分析、子网计算',
     icon: 'globe',
     order: 7,
   },
   {
     id: 'security',
     name: '安全工具',
-    description: '密码生成、泄露检测、证书解析、TOTP',
+    description: '密码生成、泄露检测、证书解析、TOTP、反弹Shell、LFI、提权、渗透测试',
     icon: 'shield',
     order: 8,
   },

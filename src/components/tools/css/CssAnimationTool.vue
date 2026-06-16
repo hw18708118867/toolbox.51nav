@@ -1,5 +1,8 @@
 <template>
   <div class="space-y-4">
+    <!-- 动态注入 keyframes -->
+    <component :is="'style'">{{ currentKeyframes }}</component>
+
     <div class="grid grid-cols-3 gap-4">
       <div>
         <label class="text-xs font-medium block mb-1" style="color: var(--color-text-secondary);">动画名称</label>
@@ -55,7 +58,7 @@
         style="border-color: var(--color-border); background-color: var(--color-bg-secondary);"
       >
         <div
-          :class="['w-16 h-16 rounded-lg', animationClass]"
+          :class="['w-16 h-16 rounded-lg']"
           :style="previewStyle"
           style="background-color: #FF6B6B;"
         ></div>
@@ -103,8 +106,8 @@ const keyframesMap: Record<string, string> = {
 }`,
 };
 
-const animationClass = computed(() => {
-  return playing.value ? `animate-${animationName.value}` : '';
+const currentKeyframes = computed(() => {
+  return keyframesMap[animationName.value] || '';
 });
 
 const previewStyle = computed(() => {

@@ -5,23 +5,24 @@
         v-model="domainInput"
         type="text"
         placeholder="请输入域名，例如: example.com"
-        class="flex-1 rounded-md border px-3 py-2 text-sm focus:outline-none "
-        
+        class="flex-1 rounded-md border px-3 py-2 text-sm focus:outline-none"
+        style="background-color: var(--color-bg-secondary); border-color: var(--color-border); color: var(--color-text);"
         @keyup.enter="lookup"
       />
       <select
         v-model="recordType"
-        class="rounded-md border px-3 py-2 text-sm focus:outline-none "
-        
+        class="rounded-md border px-3 py-2 text-sm focus:outline-none"
+        style="background-color: var(--color-bg-secondary); border-color: var(--color-border); color: var(--color-text);"
       >
         <option v-for="t in recordTypes" :key="t" :value="t">{{ t }}</option>
       </select>
       <button
         @click="lookup"
         :disabled="loading"
-        class="px-4 py-2 rounded-md text-sm font-medium text-white transition-colors disabled:opacity-50"
+        class="px-5 py-2 rounded-md text-sm font-medium text-white transition-colors disabled:opacity-50"
+        style="background-color: var(--color-primary);"
       >
-        查询
+        {{ loading ? '查询中...' : '查询' }}
       </button>
     </div>
 
@@ -57,10 +58,14 @@
             <tr v-for="(record, index) in results" :key="index" :style="index < results.length - 1 ? 'border-bottom: 1px solid var(--color-border);' : ''">
               <td class="px-4 py-2" style="color: var(--color-text);">{{ record.name }}</td>
               <td class="px-4 py-2" style="color: var(--color-text);">{{ record.TTL }}</td>
-              <td class="px-4 py-2" style="color: var(--color-text);">{{ record.type }}</td>
+              <td class="px-4 py-2">
+                <span class="px-1.5 py-0.5 rounded text-xs font-medium" :style="{ color: '#fff', backgroundColor: typeColor(record.type) }">{{ typeName(record.type) }}</span>
+              </td>
               <td class="px-4 py-2" style="color: var(--color-text);">
-                {{ formatValue(record) }}
-                <CopyButton :text="formatValue(record)" />
+                <div class="flex items-center gap-1.5">
+                  <span class="font-mono text-xs break-all">{{ formatValue(record) }}</span>
+                  <CopyButton :text="formatValue(record)" />
+                </div>
               </td>
             </tr>
           </tbody>
@@ -86,7 +91,7 @@ interface DnsRecord {
   priority?: number;
 }
 
-const recordTypes = ['A', 'AAAA', 'CNAME', 'MX', 'TXT', 'NS'];
+const recordTypes = ['A', 'AAAA', 'CNAME', 'MX', 'TXT', 'NS', 'SOA', 'SRV', 'CAA'];
 const domainInput = ref('');
 const recordType = ref('A');
 const loading = ref(false);
@@ -94,9 +99,51 @@ const error = ref('');
 const results = ref<DnsRecord[]>([]);
 const noResults = ref(false);
 
+const typeMap: Record<number, string> = {
+  1: 'A',
+  2: 'NS',
+  5: 'CNAME',
+  6: 'SOA',
+  12: 'PTR',
+  15: 'MX',
+  16: 'TXT',
+  28: 'AAAA',
+  33: 'SRV',
+  257: 'CAA',
+  46: 'RRSIG',
+  48: 'DNSKEY',
+};
+
+const typeToNumber: Record<string, number> = {
+  A: 1, NS: 2, CNAME: 5, SOA: 6, PTR: 12, MX: 15, TXT: 16, AAAA: 28, SRV: 33, CAA: 257,
+};
+
+function typeName(typeNum: number): string {
+  return typeMap[typeNum] || `TYPE${typeNum}`;
+}
+
+function typeColor(typeNum: number): string {
+  switch (typeNum) {
+    case 1: return '#2563eb';    // A - blue
+    case 5: return '#d97706';    // CNAME - amber
+    case 28: return '#7c3aed';   // AAAA - purple
+    case 15: return '#059669';   // MX - green
+    case 16: return '#0891b2';   // TXT - cyan
+    case 2: return '#dc2626';    // NS - red
+    case 6: return '#9333ea';    // SOA - violet
+    case 33: return '#ea580c';   // SRV - orange
+    case 257: return '#be185d';  // CAA - pink
+    default: return '#6b7280';   // unknown - gray
+  }
+}
+
 function formatValue(record: DnsRecord): string {
   if (record.type === 15 && record.priority !== undefined) {
     return `${record.data} (优先级: ${record.priority})`;
+  }
+  // CNAME 记录末尾的点去掉，更易读
+  if (record.type === 5 || record.type === 2 || record.type === 12) {
+    return record.data.replace(/\.$/, '');
   }
   return record.data;
 }
@@ -122,11 +169,56 @@ async function lookup() {
       throw new Error(`查询失败 (HTTP ${res.status})`);
     }
     const data = await res.json();
+
+    // NXDOMAIN 或其他错误
+    if (data.Status === 3) {
+      noResults.value = true;
+      return;
+    }
     if (data.Status !== 0) {
       throw new Error(`DNS 查询失败 (RCODE: ${data.Status})`);
     }
+
+    // 合并 Answer 和 Authority 中的记录
+    const allRecords: DnsRecord[] = [];
+
     if (data.Answer && data.Answer.length > 0) {
-      results.value = data.Answer;
+      allRecords.push(...data.Answer);
+    }
+    if (data.Authority && data.Authority.length > 0) {
+      allRecords.push(...data.Authority);
+    }
+
+    // CNAME 特殊处理：当查 CNAME 时，Answer 中可能包含 A/AAAA 等后续解析记录
+    // 过滤只显示用户查询的类型 + CNAME 链记录
+    if (recordType.value === 'CNAME' && allRecords.length > 0) {
+      const requestedType = typeToNumber[recordType.value];
+      const cnameRecords = allRecords.filter(r => r.type === 5);
+      const sameTypeRecords = allRecords.filter(r => r.type === requestedType);
+
+      if (cnameRecords.length > 0) {
+        // 优先展示 CNAME 记录，附带后续解析结果
+        results.value = [...cnameRecords, ...allRecords.filter(r => r.type !== 5)];
+      } else if (sameTypeRecords.length > 0) {
+        results.value = sameTypeRecords;
+      } else {
+        // Answer 中没有 CNAME，但有其他记录（说明域名直接是 A 记录而非 CNAME）
+        results.value = allRecords;
+      }
+    } else if (recordType.value !== 'CNAME' && allRecords.length > 0) {
+      // 非 CNAME 查询时，如果结果中有 CNAME 链也一并展示
+      const requestedType = typeToNumber[recordType.value];
+      const cnameRecords = allRecords.filter(r => r.type === 5);
+      const targetRecords = allRecords.filter(r => r.type === requestedType);
+
+      if (cnameRecords.length > 0 && targetRecords.length > 0) {
+        // 同时有 CNAME 和目标记录，全部展示
+        results.value = allRecords;
+      } else {
+        results.value = allRecords;
+      }
+    } else if (allRecords.length > 0) {
+      results.value = allRecords;
     } else {
       noResults.value = true;
     }
