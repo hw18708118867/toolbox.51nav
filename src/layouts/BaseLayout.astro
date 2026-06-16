@@ -17,6 +17,10 @@ const fullTitle = title === siteName ? title : `${title} - ${siteName}`;
 
 // GA4 — 从环境变量注入，留空则不加载
 const ga4Id = import.meta.env.PUBLIC_GA4_ID || '';
+const ga4Script = ga4Id ? `window.dataLayer = window.dataLayer || [];
+function gtag(){dataLayer.push(arguments);}
+gtag('js', new Date());
+gtag('config', '${ga4Id}');` : '';
 
 // GSC 验证 — 从环境变量注入，留空则不输出
 const gscVerification = import.meta.env.PUBLIC_GSC_VERIFICATION || '';
@@ -83,12 +87,7 @@ const gscVerification = import.meta.env.PUBLIC_GSC_VERIFICATION || '';
       <script async src={`https://www.googletagmanager.com/gtag/js?id=${ga4Id}`}></script>
     )}
     {ga4Id && (
-      <script is:inline>
-        {`window.dataLayer = window.dataLayer || [];
-        function gtag(){dataLayer.push(arguments);}
-        gtag('js', new Date());
-        gtag('config', '${ga4Id}');`}
-      </script>
+      <script is:inline set:html={ga4Script}></script>
     )}
   </body>
 </html>
