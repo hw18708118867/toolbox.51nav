@@ -1,5 +1,6 @@
 ---
 import BaseLayout from './BaseLayout.astro';
+import AnimatedIcon from '../components/common/AnimatedIcon.astro';
 import Breadcrumb from '../components/layout/Breadcrumb.astro';
 import Sidebar from '../components/layout/Sidebar.astro';
 import { categories } from '../data/categories';
@@ -30,10 +31,13 @@ const breadcrumbItems = [
           {tools.map((tool) => (
             <a
               href={`/tools/${category.id}/${tool.id}`}
-              class="glass-card block p-5 no-underline"
+              class="glass-card group flex flex-col items-center gap-2 p-5 no-underline"
             >
-              <h3 class="font-semibold text-sm mb-2 transition-colors duration-300" style="color: var(--color-text);">{tool.name}</h3>
-              <p class="text-xs leading-relaxed line-clamp-2" style="color: var(--color-text-secondary);">{tool.description}</p>
+              <AnimatedIcon toolId={tool.id} categoryFallback={tool.category} size={40} />
+              <div class="text-center">
+                <h3 class="font-semibold text-sm mb-1 transition-colors duration-300" style="color: var(--color-text);">{tool.name}</h3>
+                <p class="text-xs leading-relaxed line-clamp-2" style="color: var(--color-text-secondary);">{tool.description}</p>
+              </div>
             </a>
           ))}
         </div>

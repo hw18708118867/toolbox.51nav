@@ -1,5 +1,6 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro';
+import AnimatedIcon from '../components/common/AnimatedIcon.astro';
 import { categories } from '../data/categories';
 import { getPopularTools, getToolsByCategory, tools } from '../data/tools-registry';
 
@@ -97,8 +98,9 @@ const categoryPreview = categories.map((cat) => ({
         return (
           <a
             href={`/tools/${tool.category}/${tool.id}`}
-            class="glass-card flex flex-col items-center gap-1.5 px-3 py-4 text-center no-underline"
+            class="glass-card group flex flex-col items-center gap-1.5 px-3 py-4 text-center no-underline"
           >
+            <AnimatedIcon toolId={tool.id} categoryFallback={tool.category} size={40} />
             <span class="text-[13px] font-semibold transition-colors duration-300" style="color: var(--color-text);">{tool.name}</span>
             <span class="text-[11px]" style="color: var(--color-text-muted);">{cat?.name}</span>
           </a>
@@ -117,10 +119,18 @@ const categoryPreview = categories.map((cat) => ({
       {categoryPreview.map((cat) => (
         <a
           href={`/tools/${cat.id}/`}
-          class="glass-card block p-6 no-underline"
+          class="glass-card group block p-6 no-underline"
         >
-          <div class="flex items-center justify-between mb-4">
-            <h3 class="text-base font-bold transition-colors duration-300" style="color: var(--color-text);">{cat.name}</h3>
+          <div class="flex items-center gap-3 mb-4">
+            <AnimatedIcon toolId={cat.id} categoryFallback={cat.id} size={40} />
+            <div class="flex-1 flex items-center justify-between">
+              <h3 class="text-base font-bold transition-colors duration-300" style="color: var(--color-text);">{cat.name}</h3>
+              <span class="text-xs px-2.5 py-1 rounded-full font-medium"
+                style="background: var(--glass-light); color: var(--color-text-muted);">
+                {cat.tools.length}+ 工具
+              </span>
+            </div>
+          </div>
             <span class="text-xs px-2.5 py-1 rounded-full font-medium"
               style="background: var(--glass-light); color: var(--color-text-muted);">
               {cat.tools.length}+ 工具
