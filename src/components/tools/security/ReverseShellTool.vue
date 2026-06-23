@@ -63,8 +63,8 @@
       <div
         v-for="(item, idx) in filteredShells"
         :key="idx"
-        class="rounded-md border p-3"
-        style="border-color: var(--color-border); background-color: var(--color-bg-secondary);"
+        class="reveal-item rounded-md border p-3"
+        :style="{ '--i': Math.min(idx, 15), borderColor: 'var(--color-border)', backgroundColor: 'var(--color-bg-secondary)' }"
       >
         <div class="flex items-center justify-between gap-2 mb-2">
           <div class="flex items-center gap-2">

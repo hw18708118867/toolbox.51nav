@@ -16,9 +16,9 @@ if (!tutorials || tutorials.length === 0) return;
 
 <div class="related-tutorials">
   <h3 class="related-heading">相关教程</h3>
-  <div class="related-grid">
-    {tutorials.map((t) => (
-      <a href={`/tutorials/${t.toolId}`} class="related-card glass-card-light no-underline">
+  <div class="related-grid" data-reveal>
+    {tutorials.map((t, i) => (
+      <a href={`/tutorials/${t.toolId}`} class="related-card glass-card-light no-underline" style={`--i:${Math.min(i, 15)}`}>
         <span class="related-card-title" style="color: var(--color-text);">{t.title}</span>
         <span class="related-card-desc" style="color: var(--color-text-muted);">{t.description}</span>
       </a>

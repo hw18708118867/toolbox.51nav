@@ -74,8 +74,8 @@
       <div
         v-for="(item, idx) in filteredPayloads"
         :key="idx"
-        class="rounded-md border p-3"
-        style="border-color: var(--color-border); background-color: var(--color-bg-secondary);"
+        class="reveal-item rounded-md border p-3"
+        :style="{ '--i': Math.min(idx, 15), borderColor: 'var(--color-border)', backgroundColor: 'var(--color-bg-secondary)' }"
       >
         <div class="flex items-center justify-between gap-2 mb-1">
           <code class="text-sm font-mono" style="color: var(--color-text);">{{ item.value }}</code>

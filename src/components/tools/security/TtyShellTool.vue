@@ -24,8 +24,8 @@
       <h3 class="text-sm font-medium mb-2" style="color: var(--color-text);">TTY Shell 升级命令</h3>
       <div class="space-y-2">
         <div v-for="(item, idx) in ttyCommands" :key="idx"
-          class="rounded-md border p-3"
-          style="border-color: var(--color-border); background-color: var(--color-bg-secondary);"
+          class="reveal-item rounded-md border p-3"
+          :style="{ '--i': Math.min(idx, 15), borderColor: 'var(--color-border)', backgroundColor: 'var(--color-bg-secondary)' }"
         >
           <div class="flex items-center justify-between gap-2 mb-1">
             <span class="text-sm font-medium" style="color: var(--color-text);">{{ item.name }}</span>

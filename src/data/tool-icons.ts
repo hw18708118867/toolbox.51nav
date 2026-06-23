@@ -271,6 +271,7 @@ export const toolIcons: Record<string, IconDef> = {
   'file-transfer':     { bg: bg('security'), fg: compose('upload', 'file-text') },
   'windows-commands':  { bg: bg('security'), fg: S['terminal'] },
   'linux-commands':    { bg: bg('security'), fg: S['terminal'] },
+  'security-ports':    { bg: bg('security'), fg: compose('shield', 'globe') },
 
   // ═══ CONVERTER ═══
   'timestamp':         { bg: bg('converter'), fg: S['clock'] },

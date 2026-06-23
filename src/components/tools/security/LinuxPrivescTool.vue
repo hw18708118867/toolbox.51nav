@@ -6,8 +6,8 @@
           <div
             v-for="(cmd, cidx) in sections[cat]"
             :key="cidx"
-            class="flex items-center justify-between gap-2 rounded-md border px-3 py-2"
-            style="border-color: var(--color-border); background-color: var(--color-bg-secondary);"
+            class="reveal-item flex items-center justify-between gap-2 rounded-md border px-3 py-2"
+            :style="{ '--i': Math.min(cidx, 15), borderColor: 'var(--color-border)', backgroundColor: 'var(--color-bg-secondary)' }"
           >
             <code class="text-xs font-mono flex-1" style="color: var(--color-text); white-space: pre-wrap; word-break: break-all;">{{ cmd }}</code>
             <CopyButton :text="cmd" />

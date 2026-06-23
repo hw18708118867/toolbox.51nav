@@ -5,8 +5,8 @@
         <!-- 系统枚举 -->
         <div class="space-y-3">
           <div v-for="(item, idx) in systemEnum" :key="idx"
-            class="rounded-md border p-3"
-            style="border-color: var(--color-border); background-color: var(--color-bg-secondary);"
+            class="reveal-item rounded-md border p-3"
+            :style="{ '--i': Math.min(idx, 15), borderColor: 'var(--color-border)', backgroundColor: 'var(--color-bg-secondary)' }"
           >
             <div class="flex items-center justify-between gap-2 mb-1">
               <span v-if="item.title" class="text-sm font-medium" style="color: var(--color-text);">{{ item.title }}</span>
@@ -29,8 +29,8 @@
           </div>
 
           <div v-for="(item, idx) in adEnum" :key="idx"
-            class="rounded-md border p-3"
-            style="border-color: var(--color-border); background-color: var(--color-bg-secondary);"
+            class="reveal-item rounded-md border p-3"
+            :style="{ '--i': Math.min(idx, 15), borderColor: 'var(--color-border)', backgroundColor: 'var(--color-bg-secondary)' }"
           >
             <div class="flex items-center justify-between gap-2 mb-1">
               <span class="text-sm font-medium" style="color: var(--color-text);">{{ item.title }}</span>
@@ -45,8 +45,8 @@
         <!-- AD 脚本 -->
         <div class="space-y-3">
           <div v-for="(item, idx) in adScripts" :key="idx"
-            class="rounded-md border p-3"
-            style="border-color: var(--color-border); background-color: var(--color-bg-secondary);"
+            class="reveal-item rounded-md border p-3"
+            :style="{ '--i': Math.min(idx, 15), borderColor: 'var(--color-border)', backgroundColor: 'var(--color-bg-secondary)' }"
           >
             <div class="flex items-center justify-between gap-2 mb-1">
               <span class="text-sm font-medium" style="color: var(--color-text);">{{ item.title }}</span>
@@ -62,8 +62,8 @@
         <div class="space-y-3">
           <h4 class="text-sm font-medium" style="color: var(--color-text);">HTTP 下载</h4>
           <div v-for="(item, idx) in downloadCommands" :key="'dl-'+idx"
-            class="rounded-md border p-3"
-            style="border-color: var(--color-border); background-color: var(--color-bg-secondary);"
+            class="reveal-item rounded-md border p-3"
+            :style="{ '--i': Math.min(idx, 15), borderColor: 'var(--color-border)', backgroundColor: 'var(--color-bg-secondary)' }"
           >
             <div class="flex items-center justify-between gap-2 mb-1">
               <span v-if="item.title" class="text-sm font-medium" style="color: var(--color-text);">{{ item.title }}</span>
@@ -74,8 +74,8 @@
 
           <h4 class="text-sm font-medium mt-4" style="color: var(--color-text);">WLAN 凭证</h4>
           <div v-for="(item, idx) in wlanCommands" :key="'wlan-'+idx"
-            class="flex items-center justify-between gap-2 rounded-md border px-3 py-2"
-            style="border-color: var(--color-border); background-color: var(--color-bg-secondary);"
+            class="reveal-item flex items-center justify-between gap-2 rounded-md border px-3 py-2"
+            :style="{ '--i': Math.min(idx, 15), borderColor: 'var(--color-border)', backgroundColor: 'var(--color-bg-secondary)' }"
           >
             <code class="text-xs font-mono flex-1" style="color: var(--color-text);">{{ item }}</code>
             <CopyButton :text="item" />

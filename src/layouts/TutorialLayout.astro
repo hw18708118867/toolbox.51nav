@@ -60,14 +60,14 @@ const jsonLd = {
     "name": "开发工具箱",
     "logo": {
       "@type": "ImageObject",
-      "url": "https://webtools.pages.dev/favicon.svg",
+      "url": "https://toolbox.51nav.com/favicon.svg",
     },
   },
   "about": tool ? { "@type": "SoftwareApplication", "name": tool.name } : undefined,
   "keywords": data.keywords.join(','),
 };
 
-const fullTitle = `${data.title} — 开发工具箱`;
+const fullTitle = `${data.title} — 技术教程`;
 ---
 
 <BaseLayout
@@ -145,9 +145,6 @@ const fullTitle = `${data.title} — 开发工具箱`;
 
   <!-- JSON-LD -->
   <script type="application/ld+json" set:html={JSON.stringify(jsonLd)}></script>
-
-  <!-- Canonical -->
-  <link rel="canonical" href={Astro.url.href} />
 </BaseLayout>
 
 <style>

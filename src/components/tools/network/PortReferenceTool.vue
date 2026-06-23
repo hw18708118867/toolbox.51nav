@@ -7,7 +7,7 @@
       <table class="w-full text-xs">
         <thead><tr style="background-color: var(--color-bg-tertiary);"><th class="px-3 py-2 text-left font-medium" style="color: var(--color-text-secondary);">端口</th><th class="px-3 py-2 text-left font-medium" style="color: var(--color-text-secondary);">协议</th><th class="px-3 py-2 text-left font-medium" style="color: var(--color-text-secondary);">服务</th><th class="px-3 py-2 text-left font-medium" style="color: var(--color-text-secondary);">说明</th></tr></thead>
         <tbody>
-          <tr v-for="p in filteredPorts" :key="p.port + p.protocol" class="border-t" style="border-color: var(--color-border);">
+          <tr v-for="(p, i) in filteredPorts" :key="p.port + p.protocol" class="reveal-item border-t" :style="{ '--i': Math.min(i, 15), borderColor: 'var(--color-border)' }">
             <td class="px-3 py-1.5 font-mono" style="color: var(--color-primary);">{{ p.port }}</td>
             <td class="px-3 py-1.5" style="color: var(--color-text-muted);">{{ p.protocol }}</td>
             <td class="px-3 py-1.5 font-medium" style="color: var(--color-text);">{{ p.service }}</td>

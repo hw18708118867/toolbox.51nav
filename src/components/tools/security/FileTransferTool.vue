@@ -28,8 +28,8 @@
         <!-- PowerShell 下载 -->
         <div class="space-y-3">
           <div v-for="(item, idx) in psDownloadCommands" :key="idx"
-            class="rounded-md border p-3"
-            style="border-color: var(--color-border); background-color: var(--color-bg-secondary);"
+            class="reveal-item rounded-md border p-3"
+            :style="{ '--i': Math.min(idx, 15), borderColor: 'var(--color-border)', backgroundColor: 'var(--color-bg-secondary)' }"
           >
             <div class="flex items-center justify-between gap-2 mb-1">
               <span class="text-sm font-medium" style="color: var(--color-text);">{{ item.title }}</span>
@@ -48,8 +48,8 @@
             无文件攻击直接在内存中执行 Payload，无需写入磁盘。使用 <code style="color: var(--color-text);">Invoke-Expression</code> 或别名 <code style="color: var(--color-text);">IEX</code>。
           </p>
           <div v-for="(item, idx) in filelessCommands" :key="idx"
-            class="rounded-md border p-3"
-            style="border-color: var(--color-border); background-color: var(--color-bg-secondary);"
+            class="reveal-item rounded-md border p-3"
+            :style="{ '--i': Math.min(idx, 15), borderColor: 'var(--color-border)', backgroundColor: 'var(--color-bg-secondary)' }"
           >
             <div class="flex items-center justify-between gap-2 mb-1">
               <span class="text-sm font-medium" style="color: var(--color-text);">{{ item.title }}</span>
@@ -67,8 +67,8 @@
             SMB 协议运行在 <strong>TCP/445</strong> 端口，常见于企业 Windows 网络。
           </p>
           <div v-for="(item, idx) in smbCommands" :key="idx"
-            class="rounded-md border p-3"
-            style="border-color: var(--color-border); background-color: var(--color-bg-secondary);"
+            class="reveal-item rounded-md border p-3"
+            :style="{ '--i': Math.min(idx, 15), borderColor: 'var(--color-border)', backgroundColor: 'var(--color-bg-secondary)' }"
           >
             <div class="flex items-center justify-between gap-2 mb-1">
               <span class="text-sm font-medium" style="color: var(--color-text);">{{ item.title }}</span>
@@ -93,8 +93,8 @@
           </div>
 
           <div v-for="(item, idx) in ftpCommands" :key="idx"
-            class="rounded-md border p-3"
-            style="border-color: var(--color-border); background-color: var(--color-bg-secondary);"
+            class="reveal-item rounded-md border p-3"
+            :style="{ '--i': Math.min(idx, 15), borderColor: 'var(--color-border)', backgroundColor: 'var(--color-bg-secondary)' }"
           >
             <div class="flex items-center justify-between gap-2 mb-1">
               <span class="text-sm font-medium" style="color: var(--color-text);">{{ item.title }}</span>
@@ -113,8 +113,8 @@
           </div>
 
           <div v-for="(item, idx) in ftpUploadCommands" :key="'up-'+idx"
-            class="rounded-md border p-3"
-            style="border-color: var(--color-border); background-color: var(--color-bg-secondary);"
+            class="reveal-item rounded-md border p-3"
+            :style="{ '--i': Math.min(idx, 15), borderColor: 'var(--color-border)', backgroundColor: 'var(--color-bg-secondary)' }"
           >
             <div class="flex items-center justify-between gap-2 mb-1">
               <span class="text-sm font-medium" style="color: var(--color-text);">{{ item.title }}</span>

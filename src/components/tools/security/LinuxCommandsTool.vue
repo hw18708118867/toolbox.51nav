@@ -17,8 +17,8 @@
       <template v-for="(cat, idx) in categories" :key="idx" #[`tab-${idx}`]>
         <div class="space-y-3">
           <div v-for="(item, cidx) in filteredItems(cat)" :key="cidx"
-            class="rounded-md border p-3"
-            style="border-color: var(--color-border); background-color: var(--color-bg-secondary);"
+            class="reveal-item rounded-md border p-3"
+            :style="{ '--i': Math.min(cidx, 15), borderColor: 'var(--color-border)', backgroundColor: 'var(--color-bg-secondary)' }"
           >
             <div class="flex items-center justify-between gap-2 mb-1">
               <span class="text-sm font-medium" style="color: var(--color-text);">{{ item.title }}</span>

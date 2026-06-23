@@ -5,8 +5,8 @@
         <!-- 目录遍历 -->
         <div class="space-y-3">
           <div v-for="(item, idx) in traversalPayloads" :key="idx"
-            class="rounded-md border p-3"
-            style="border-color: var(--color-border); background-color: var(--color-bg-secondary);"
+            class="reveal-item rounded-md border p-3"
+            :style="{ '--i': Math.min(idx, 15), borderColor: 'var(--color-border)', backgroundColor: 'var(--color-bg-secondary)' }"
           >
             <div class="flex items-center justify-between gap-2 mb-1">
               <span class="text-sm font-medium" style="color: var(--color-text);">{{ item.title }}</span>
@@ -25,8 +25,8 @@
         <!-- PHP Wrapper -->
         <div class="space-y-3">
           <div v-for="(item, idx) in phpWrapperPayloads" :key="idx"
-            class="rounded-md border p-3"
-            style="border-color: var(--color-border); background-color: var(--color-bg-secondary);"
+            class="reveal-item rounded-md border p-3"
+            :style="{ '--i': Math.min(idx, 15), borderColor: 'var(--color-border)', backgroundColor: 'var(--color-bg-secondary)' }"
           >
             <div class="flex items-center justify-between gap-2 mb-1">
               <span class="text-sm font-medium" style="color: var(--color-text);">{{ item.title }}</span>
@@ -49,8 +49,8 @@
             <div
               v-for="(file, fidx) in section.files"
               :key="fidx"
-              class="flex items-center justify-between gap-2 rounded border px-3 py-1.5"
-              style="border-color: var(--color-border); background-color: var(--color-bg-secondary);"
+              class="reveal-item flex items-center justify-between gap-2 rounded border px-3 py-1.5"
+              :style="{ '--i': Math.min(fidx, 15), borderColor: 'var(--color-border)', backgroundColor: 'var(--color-bg-secondary)' }"
             >
               <code class="text-xs font-mono" style="color: var(--color-text);">{{ file }}</code>
               <CopyButton :text="file" />

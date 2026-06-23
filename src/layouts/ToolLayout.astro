@@ -24,6 +24,7 @@ const jsonLd = {
   "@type": "WebApplication",
   "name": tool.name,
   "description": tool.description,
+  "url": new URL(`/tools/${category.id}/${tool.id}/`, Astro.site).href,
   "applicationCategory": "DeveloperApplication",
   "operatingSystem": "Any",
   "offers": {
@@ -36,7 +37,6 @@ const jsonLd = {
 
 <BaseLayout title={tool.name} description={tool.description} keywords={tool.keywords.join(',')}>
   <script type="application/ld+json" set:html={JSON.stringify(jsonLd)} />
-  <link rel="canonical" href={Astro.url.href} />
 
   <div class="max-w-[1400px] mx-auto px-5 py-6">
     <Breadcrumb items={breadcrumbItems} />

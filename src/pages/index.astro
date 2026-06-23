@@ -9,13 +9,42 @@ const categoryPreview = categories.map((cat) => ({
   ...cat,
   tools: getToolsByCategory(cat.id).slice(0, 3),
 }));
+
+// 首页 JSON-LD：WebSite（含搜索 Action）+ Organization
+const jsonLd = [
+  {
+    "@context": "https://schema.org",
+    "@type": "WebSite",
+    "name": "开发工具箱",
+    "url": "https://toolbox.51nav.com/",
+    "description": "免费在线开发与安全工具箱，170+ 常用工具一站式搞定",
+    "inLanguage": "zh-CN",
+    "potentialAction": {
+      "@type": "SearchAction",
+      "target": {
+        "@type": "EntryPoint",
+        "urlTemplate": "https://toolbox.51nav.com/tools/?q={search_term_string}"
+      },
+      "query-input": "required name=search_term_string"
+    }
+  },
+  {
+    "@context": "https://schema.org",
+    "@type": "Organization",
+    "name": "开发工具箱",
+    "url": "https://toolbox.51nav.com/",
+    "logo": "https://toolbox.51nav.com/favicon.svg"
+  }
+];
 ---
 
 <BaseLayout
-  title="开发工具箱 - 免费在线编码加解密工具"
+  title="免费在线编码加解密工具"
   description="免费在线开发与安全工具箱，提供编码解码、加密解密、哈希计算、文本处理、数据格式转换等 170+ 常用工具，所有操作浏览器本地完成"
   keywords="在线工具,编码解码,加密解密,哈希计算,Base64,MD5,AES,JSON格式化,开发者工具"
 >
+  <script type="application/ld+json" set:html={JSON.stringify(jsonLd)} />
+
   <!-- Hero -->
   <section class="relative pt-20 pb-16 md:pt-28 md:pb-24">
     <div class="max-w-[760px] mx-auto px-5 text-center">
@@ -92,13 +121,14 @@ const categoryPreview = categories.map((cat) => ({
       <h2 class="text-xl md:text-2xl font-bold mb-1" style="color: var(--color-text);">🔥 热门工具</h2>
       <p class="text-sm" style="color: var(--color-text-muted);">开发者最常用的工具</p>
     </div>
-    <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-3">
-      {popularTools.map((tool) => {
+    <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-3" data-reveal>
+      {popularTools.map((tool, i) => {
         const cat = categories.find(c => c.id === tool.category);
         return (
           <a
             href={`/tools/${tool.category}/${tool.id}`}
             class="glass-card group flex flex-col items-center gap-1.5 px-3 py-4 text-center no-underline"
+            style={`--i:${Math.min(i, 15)}`}
           >
             <AnimatedIcon toolId={tool.id} categoryFallback={tool.category} size={40} />
             <span class="text-[13px] font-semibold transition-colors duration-300" style="color: var(--color-text);">{tool.name}</span>
@@ -115,11 +145,12 @@ const categoryPreview = categories.map((cat) => ({
       <h2 class="text-xl md:text-2xl font-bold mb-1" style="color: var(--color-text);">📂 工具分类</h2>
       <p class="text-sm" style="color: var(--color-text-muted);">16 大分类，覆盖开发全场景</p>
     </div>
-    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
-      {categoryPreview.map((cat) => (
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5" data-reveal>
+      {categoryPreview.map((cat, i) => (
         <a
           href={`/tools/${cat.id}/`}
           class="glass-card group block p-6 no-underline"
+          style={`--i:${Math.min(i, 15)}`}
         >
           <div class="flex items-center gap-3 mb-4">
             <AnimatedIcon toolId={cat.id} categoryFallback={cat.id} size={40} />
@@ -130,11 +161,6 @@ const categoryPreview = categories.map((cat) => ({
                 {cat.tools.length}+ 工具
               </span>
             </div>
-          </div>
-            <span class="text-xs px-2.5 py-1 rounded-full font-medium"
-              style="background: var(--glass-light); color: var(--color-text-muted);">
-              {cat.tools.length}+ 工具
-            </span>
           </div>
           <p class="text-sm mb-4 leading-relaxed" style="color: var(--color-text-secondary);">{cat.description}</p>
           <div class="flex flex-wrap gap-2">

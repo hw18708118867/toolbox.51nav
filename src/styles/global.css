@@ -74,6 +74,11 @@
 
   --header-height: 64px;
   --sidebar-width: 260px;
+
+  /* 入场动效 */
+  --reveal-duration: 0.5s;
+  --reveal-stagger: 55ms;
+  --reveal-distance: 16px;
 }
 
 /* ---- 暗色模式 ---- */
@@ -150,6 +155,12 @@
   0%, 100% { transform: translate(0, 0) scale(1); }
   40%  { transform: translate(-10%, 4%) scale(0.97); }
   80%  { transform: translate(6%, -4%) scale(1.03); }
+}
+
+/* 列表项向上淡入入场动效 */
+@keyframes reveal-up {
+  from { opacity: 0; transform: translateY(var(--reveal-distance)); }
+  to   { opacity: 1; transform: translateY(0); }
 }
 
 /* ============================================
@@ -283,6 +294,37 @@ body > * {
 [data-theme="dark"] .glass-card,
 [data-theme="dark"] .glass-panel {
   border-color: var(--glass-border);
+}
+
+/* ============================================
+   列表项入场动效
+   ============================================ */
+
+/* Mode A：工具内列表（Vue），挂载即播放；TabView 切 Tab 时 slot 重挂载会自动重触发 */
+.reveal-item {
+  opacity: 0;
+  animation: reveal-up var(--reveal-duration) cubic-bezier(0.22, 1, 0.36, 1) both;
+  animation-delay: calc(var(--i, 0) * var(--reveal-stagger));
+}
+
+/* Mode B：页面级网格，滚动进入视口才揭晓（由 BaseLayout 的 IntersectionObserver 加 .is-visible） */
+[data-reveal] > * {
+  opacity: 0;
+}
+[data-reveal].is-visible > * {
+  animation: reveal-up var(--reveal-duration) cubic-bezier(0.22, 1, 0.36, 1) both;
+  animation-delay: calc(var(--i, 0) * var(--reveal-stagger));
+}
+
+/* 尊重用户的减少动效偏好 */
+@media (prefers-reduced-motion: reduce) {
+  .reveal-item,
+  [data-reveal] > *,
+  [data-reveal].is-visible > * {
+    animation: none !important;
+    opacity: 1 !important;
+    transform: none !important;
+  }
 }
 
 /* ============================================

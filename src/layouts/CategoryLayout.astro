@@ -27,11 +27,12 @@ const breadcrumbItems = [
         <h1 class="text-2xl md:text-3xl font-extrabold mb-2 tracking-tight" style="color: var(--color-text);">{category.name}</h1>
         <p class="mb-7 text-sm" style="color: var(--color-text-secondary);">{category.description}</p>
 
-        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-          {tools.map((tool) => (
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4" data-reveal>
+          {tools.map((tool, i) => (
             <a
               href={`/tools/${category.id}/${tool.id}`}
               class="glass-card group flex flex-col items-center gap-2 p-5 no-underline"
+              style={`--i:${Math.min(i, 15)}`}
             >
               <AnimatedIcon toolId={tool.id} categoryFallback={tool.category} size={40} />
               <div class="text-center">

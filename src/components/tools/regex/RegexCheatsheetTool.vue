@@ -2,7 +2,7 @@
   <div class="space-y-4">
     <div class="grid grid-cols-2 gap-4">
       <!-- Anchors -->
-      <div class="rounded-md border p-4" style="border-color: var(--color-border); background-color: var(--color-bg-secondary);">
+      <div class="reveal-item rounded-md border p-4" style="border-color: var(--color-border); background-color: var(--color-bg-secondary);">
         <h3 class="text-sm font-medium mb-3" style="color: var(--color-primary);">定位符</h3>
         <div class="space-y-2">
           <div v-for="item in anchors" :key="item.pattern" class="flex gap-3 text-xs">
@@ -13,7 +13,7 @@
       </div>
 
       <!-- Character Classes -->
-      <div class="rounded-md border p-4" style="border-color: var(--color-border); background-color: var(--color-bg-secondary);">
+      <div class="reveal-item rounded-md border p-4" style="border-color: var(--color-border); background-color: var(--color-bg-secondary);">
         <h3 class="text-sm font-medium mb-3" style="color: var(--color-primary);">字符类</h3>
         <div class="space-y-2">
           <div v-for="item in charClasses" :key="item.pattern" class="flex gap-3 text-xs">
@@ -24,7 +24,7 @@
       </div>
 
       <!-- Quantifiers -->
-      <div class="rounded-md border p-4" style="border-color: var(--color-border); background-color: var(--color-bg-secondary);">
+      <div class="reveal-item rounded-md border p-4" style="border-color: var(--color-border); background-color: var(--color-bg-secondary);">
         <h3 class="text-sm font-medium mb-3" style="color: var(--color-primary);">量词</h3>
         <div class="space-y-2">
           <div v-for="item in quantifiers" :key="item.pattern" class="flex gap-3 text-xs">
@@ -35,7 +35,7 @@
       </div>
 
       <!-- Groups -->
-      <div class="rounded-md border p-4" style="border-color: var(--color-border); background-color: var(--color-bg-secondary);">
+      <div class="reveal-item rounded-md border p-4" style="border-color: var(--color-border); background-color: var(--color-bg-secondary);">
         <h3 class="text-sm font-medium mb-3" style="color: var(--color-primary);">分组与引用</h3>
         <div class="space-y-2">
           <div v-for="item in groups" :key="item.pattern" class="flex gap-3 text-xs">
@@ -46,7 +46,7 @@
       </div>
 
       <!-- Lookarounds -->
-      <div class="rounded-md border p-4" style="border-color: var(--color-border); background-color: var(--color-bg-secondary);">
+      <div class="reveal-item rounded-md border p-4" style="border-color: var(--color-border); background-color: var(--color-bg-secondary);">
         <h3 class="text-sm font-medium mb-3" style="color: var(--color-primary);">环视</h3>
         <div class="space-y-2">
           <div v-for="item in lookarounds" :key="item.pattern" class="flex gap-3 text-xs">
@@ -57,7 +57,7 @@
       </div>
 
       <!-- Common Patterns -->
-      <div class="rounded-md border p-4" style="border-color: var(--color-border); background-color: var(--color-bg-secondary);">
+      <div class="reveal-item rounded-md border p-4" style="border-color: var(--color-border); background-color: var(--color-bg-secondary);">
         <h3 class="text-sm font-medium mb-3" style="color: var(--color-primary);">常用正则</h3>
         <div class="space-y-2">
           <div v-for="item in commonPatterns" :key="item.pattern" class="text-xs">

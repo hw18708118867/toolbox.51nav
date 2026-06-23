@@ -25,8 +25,8 @@
                 <div
                   v-for="(pattern, pidx) in catGroup.patterns"
                   :key="pidx"
-                  class="rounded-md border p-3"
-                  style="border-color: var(--color-border); background-color: var(--color-bg-secondary);"
+                  class="reveal-item rounded-md border p-3"
+                  :style="{ '--i': Math.min(pidx, 15), borderColor: 'var(--color-border)', backgroundColor: 'var(--color-bg-secondary)' }"
                 >
                   <div class="flex items-start justify-between gap-2 mb-1">
                     <div class="flex-1 min-w-0">
