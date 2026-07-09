@@ -24,6 +24,8 @@ const C: Record<string, [string, string]> = {
   math:        ['#06b6d4', '#0e7490'],
   document:    ['#f43f5e', '#be123c'],
   analysis:    ['#22c55e', '#15803d'],
+  datetime:    ['#c026d3', '#86198f'],
+  web3:        ['#7c3aed', '#4c1d95'],
 };
 
 // ── Foreground symbol library ──
@@ -137,6 +139,7 @@ export const toolIcons: Record<string, IconDef> = {
   'math':              { bg: bg('math'), fg: S['calculator'] },
   'document':          { bg: bg('document'), fg: S['file-text'] },
   'analysis':          { bg: bg('analysis'), fg: S['bar-chart'] },
+  'datetime':          { bg: bg('datetime'), fg: S['clock'] },
 
   // ═══ ENCODING ═══
   'base64':            { bg: bg('encoding'), fg: compose('arrow-left-right', 'binary') },
@@ -272,11 +275,18 @@ export const toolIcons: Record<string, IconDef> = {
   'windows-commands':  { bg: bg('security'), fg: S['terminal'] },
   'linux-commands':    { bg: bg('security'), fg: S['terminal'] },
   'security-ports':    { bg: bg('security'), fg: compose('shield', 'globe') },
+  'jwt':               { bg: bg('security'), fg: `<rect x="9" y="15" width="30" height="18" rx="4" fill="none" stroke="white" stroke-width="2.5"/><path d="M17 15v-3a7 7 0 0114 0v3" stroke="white" stroke-width="2.5" fill="none" stroke-linecap="round"/><circle cx="24" cy="24" r="2.5" fill="white"/>` },
 
   // ═══ CONVERTER ═══
   'timestamp':         { bg: bg('converter'), fg: S['clock'] },
   'radix':             { bg: bg('converter'), fg: compose('binary', 'arrow-cycle') },
   'color-convert':     { bg: bg('converter'), fg: compose('palette', 'arrow-cycle') },
+  'color-contrast':    { bg: bg('converter'), fg: `<circle cx="24" cy="24" r="13" fill="none" stroke="white" stroke-width="2.5"/><path d="M24 11a13 13 0 010 26z" fill="white"/>` },
+
+  // ── Web3 / 区块链 ──
+  'web3':              { bg: bg('web3'), fg: `<path d="M24 5l15 8.5v17L24 39 9 30.5v-17z" fill="none" stroke="white" stroke-width="2.5" stroke-linejoin="round"/><path d="M24 5v17l15-8.5M24 22v17l-15-8.5M9 30.5L24 22l15 8.5" fill="none" stroke="white" stroke-width="2" opacity="0.7" stroke-linejoin="round"/>` },
+  'bip39':             { bg: bg('web3'), fg: `<circle cx="16" cy="18" r="5" fill="none" stroke="white" stroke-width="2.5"/><path d="M20 18h14l3 3-3 3-3-3-3 3" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" fill="none"/><path d="M9 30h30M9 34h22" stroke="white" stroke-width="2" stroke-linecap="round"/>` },
+  'addr-validate':     { bg: bg('web3'), fg: `<rect x="9" y="13" width="30" height="22" rx="3" fill="none" stroke="white" stroke-width="2.5"/><path d="M15 24l4 4 8-8" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" fill="none"/>` },
   'unit-convert':      { bg: bg('converter'), fg: compose('arrow-left-right', 'equal') },
   'number-base':       { bg: bg('converter'), fg: compose('hash', 'arrow-right') },
   'ascii-table':       { bg: bg('converter'), fg: S['table'] },
@@ -285,6 +295,7 @@ export const toolIcons: Record<string, IconDef> = {
   'qr-generate':       { bg: bg('converter'), fg: S['qr'] },
   'qr-decode':         { bg: bg('converter'), fg: compose('qr', 'search') },
   'barcode-gen':       { bg: bg('converter'), fg: S['barcode'] },
+  'cron':              { bg: bg('converter'), fg: `<circle cx="16" cy="24" r="9" fill="none" stroke="white" stroke-width="2.5"/><polyline points="16,17 16,24 21,27" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" fill="none"/><circle cx="33" cy="25" r="5" fill="none" stroke="white" stroke-width="2"/><path d="M33 17v-2M38 19.5l1.5-1.5M41 25h-2M38 30.5l1.5 1.5M28 30.5l-1.5 1.5M27 25h-2M28 19.5l-1.5-1.5" stroke="white" stroke-width="2" stroke-linecap="round" fill="none"/>` },
 
   // ═══ IMAGE ═══
   'image-compress':    { bg: bg('image'), fg: compose('image-landscape', 'minimize') },
@@ -345,6 +356,12 @@ export const toolIcons: Record<string, IconDef> = {
   'json-to-mysql':     { bg: bg('document'), fg: compose('braces', 'database') },
   'excel-to-json':     { bg: bg('document'), fg: compose('table', 'braces') },
   'pdf-to-text':       { bg: bg('document'), fg: compose('file-text', 'arrow-right') },
+  'html-format':       { bg: bg('document'), fg: S['code-brackets'] },
+  'sql-format':        { bg: bg('document'), fg: S['database'] },
+
+  // ═══ DATETIME ═══
+  'timezone-convert':  { bg: bg('datetime'), fg: compose('globe', 'clock') },
+  'date-diff':         { bg: bg('datetime'), fg: S['calendar'] },
 
   // ═══ ANALYSIS ═══
   'frequency-analysis': { bg: bg('analysis'), fg: S['bar-chart'] },

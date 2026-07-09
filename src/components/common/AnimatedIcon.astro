@@ -35,6 +35,7 @@ const fallbackBg: Record<string, [string, string]> = {
   math:        ['#06b6d4', '#0e7490'],
   document:    ['#f43f5e', '#be123c'],
   analysis:    ['#22c55e', '#15803d'],
+  datetime:    ['#c026d3', '#86198f'],
 };
 
 const [g1, g2] = def?.bg || (categoryFallback ? (fallbackBg[categoryFallback] || fallbackBg['encoding']) : fallbackBg['encoding']);

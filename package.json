@@ -12,6 +12,7 @@
   "dependencies": {
     "@astrojs/sitemap": "^3.7.3",
     "@astrojs/vue": "^5.1.4",
+    "@noble/hashes": "^1.4.0",
     "@tailwindcss/vite": "^4.3.0",
     "@types/crypto-js": "^4.2.2",
     "astro": "^5.18.2",

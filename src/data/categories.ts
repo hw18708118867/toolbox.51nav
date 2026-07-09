@@ -119,6 +119,20 @@ export const categories: Category[] = [
     icon: 'bar-chart',
     order: 16,
   },
+  {
+    id: 'datetime',
+    name: '时间日期',
+    description: '时区转换、日期差计算、日期加减运算',
+    icon: 'clock',
+    order: 17,
+  },
+  {
+    id: 'web3',
+    name: 'Web3 / 区块链',
+    description: 'BIP39 助记词、地址校验、密钥派生等区块链工具',
+    icon: 'web3',
+    order: 18,
+  },
 ];
 
 export function getCategoryById(id: string): Category | undefined {
