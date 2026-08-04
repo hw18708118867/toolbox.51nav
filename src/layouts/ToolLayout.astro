@@ -33,10 +33,22 @@ const jsonLd = {
     "priceCurrency": "CNY"
   }
 };
+
+const breadcrumbLd = {
+  '@context': 'https://schema.org',
+  '@type': 'BreadcrumbList',
+  itemListElement: breadcrumbItems.map((b, i) => ({
+    '@type': 'ListItem',
+    position: i + 1,
+    name: b.label,
+    ...(b.href ? { item: new URL(b.href, Astro.site).href } : {}),
+  })),
+};
 ---
 
 <BaseLayout title={tool.name} description={tool.description} keywords={tool.keywords.join(',')}>
   <script type="application/ld+json" set:html={JSON.stringify(jsonLd)} />
+  <script type="application/ld+json" set:html={JSON.stringify(breadcrumbLd)} />
 
   <div class="max-w-[1400px] mx-auto px-5 py-6">
     <Breadcrumb items={breadcrumbItems} />

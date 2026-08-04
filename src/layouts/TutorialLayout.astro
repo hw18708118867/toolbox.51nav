@@ -68,6 +68,52 @@ const jsonLd = {
 };
 
 const fullTitle = `${data.title} — 技术教程`;
+
+// 解析正文「常见问题」段里的 **Q：…** 问答，生成 FAQPage 结构化数据
+function parseFaq(body: string): { q: string; a: string }[] {
+  const m = body.match(/##\s*常见(问题|问答)/);
+  if (!m || m.index === undefined) return [];
+  const section = body.slice(m.index);
+  const blocks = section.split(/\*\*Q[：:]/);
+  const out: { q: string; a: string }[] = [];
+  for (let i = 1; i < blocks.length; i++) {
+    const nl = blocks[i].indexOf('\n');
+    if (nl === -1) continue;
+    const q = blocks[i].slice(0, nl).replace(/\*\*/g, '').trim();
+    let a = blocks[i].slice(nl + 1).trim();
+    a = a
+      .replace(/\*\*/g, '')
+      .replace(/\[([^\]]+)\]\([^)]+\)/g, '$1')
+      .replace(/\s+/g, ' ')
+      .trim();
+    if (q && a) out.push({ q, a });
+  }
+  return out;
+}
+const faqs = parseFaq(tutorial.body);
+
+const breadcrumbLd = {
+  '@context': 'https://schema.org',
+  '@type': 'BreadcrumbList',
+  itemListElement: breadcrumbItems.map((b, i) => ({
+    '@type': 'ListItem',
+    position: i + 1,
+    name: b.label,
+    ...(b.href ? { item: new URL(b.href, Astro.site).href } : {}),
+  })),
+};
+
+const faqLd = faqs.length
+  ? {
+      '@context': 'https://schema.org',
+      '@type': 'FAQPage',
+      mainEntity: faqs.map((f) => ({
+        '@type': 'Question',
+        name: f.q,
+        acceptedAnswer: { '@type': 'Answer', text: f.a },
+      })),
+    }
+  : null;
 ---
 
 <BaseLayout
@@ -145,6 +191,8 @@ const fullTitle = `${data.title} — 技术教程`;
 
   <!-- JSON-LD -->
   <script type="application/ld+json" set:html={JSON.stringify(jsonLd)}></script>
+  <script type="application/ld+json" set:html={JSON.stringify(breadcrumbLd)}></script>
+  {faqLd && <script type="application/ld+json" set:html={JSON.stringify(faqLd)}></script>}
 </BaseLayout>
 
 <style>

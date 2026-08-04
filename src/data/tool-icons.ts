@@ -269,6 +269,7 @@ export const toolIcons: Record<string, IconDef> = {
   'lfi-payload':       { bg: bg('security'), fg: compose('bug', 'file-text') },
   'tty-shell':         { bg: bg('security'), fg: compose('terminal', 'smartphone') },
   'msfvenom':          { bg: bg('security'), fg: compose('skull', 'terminal') },
+  'nmap':              { bg: bg('security'), fg: `<circle cx="24" cy="24" r="12" fill="none" stroke="white" stroke-width="2.5"/><circle cx="24" cy="24" r="7" fill="none" stroke="white" stroke-width="1.8" opacity="0.7"/><line x1="24" y1="24" x2="33" y2="15" stroke="white" stroke-width="2.5" stroke-linecap="round"/><circle cx="24" cy="24" r="2" fill="white"/>` },
   'linux-privesc':     { bg: bg('security'), fg: compose('arrow-up', 'terminal') },
   'powershell-commands': { bg: bg('security'), fg: S['terminal'] },
   'file-transfer':     { bg: bg('security'), fg: compose('upload', 'file-text') },
