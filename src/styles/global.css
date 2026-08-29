@@ -474,6 +474,70 @@ select {
 }
 
 /* ============================================
+   教程正文 · 原理示意图（内联 SVG）
+   类名前缀 dg- = diagram，配色全部走主题变量，
+   因此亮色/暗色模式下都能自动适配
+   ============================================ */
+.dg-figure {
+  margin: 1.75rem 0;
+  text-align: center;
+}
+
+.dg-figure svg {
+  display: block;
+  width: 100%;
+  height: auto;
+  max-width: 840px;
+  margin: 0 auto;
+  overflow: visible;
+}
+
+.dg-figure figcaption {
+  margin-top: 0.75rem;
+  font-size: 0.8125rem;
+  line-height: 1.7;
+  color: var(--color-text-muted);
+  text-align: center;
+}
+
+/* 方块 */
+.dg-box,
+.dg-box-p,
+.dg-box-a,
+.dg-box-w,
+.dg-box-g {
+  stroke-width: 1.2;
+}
+.dg-box   { fill: var(--glass-light);        stroke: currentColor;         stroke-opacity: .30; }
+.dg-box-p { fill: var(--color-primary-light); stroke: var(--color-primary); stroke-opacity: .60; }
+.dg-box-a { fill: var(--color-accent-light);  stroke: var(--color-accent);  stroke-opacity: .50; }
+.dg-box-w { fill: rgba(255, 159, 10, .12);    stroke: #ff9f0a;              stroke-opacity: .60; }
+.dg-box-g { fill: rgba(52, 199, 89, .12);     stroke: #34c759;              stroke-opacity: .55; }
+
+/* 连线 */
+.dg-line   { stroke: currentColor;       stroke-opacity: .45; stroke-width: 1.4; fill: none; }
+.dg-line-p { stroke: var(--color-primary); stroke-opacity: .75; stroke-width: 1.5; fill: none; }
+.dg-line-a { stroke: var(--color-accent);  stroke-opacity: .70; stroke-width: 1.5; fill: none; }
+.dg-dash   { stroke: currentColor;       stroke-opacity: .38; stroke-width: 1.2; fill: none; stroke-dasharray: 5 4; }
+.dg-frame  { fill: none; stroke: currentColor; stroke-opacity: .22; stroke-width: 1.2; stroke-dasharray: 6 4; }
+
+/* 文字 */
+.dg-t  { fill: currentColor; fill-opacity: .90; font-size: 13px; }
+.dg-tb { fill: currentColor; font-size: 13px; font-weight: 600; }
+.dg-tl { fill: currentColor; fill-opacity: .85; font-size: 11.5px; font-weight: 600; }
+.dg-ts { fill: currentColor; fill-opacity: .60; font-size: 11px; }
+
+/* 状态矩阵单元格 */
+.dg-cell   { fill: none; stroke: currentColor; stroke-opacity: .32; stroke-width: 1; }
+.dg-cell-p { fill: var(--color-primary); fill-opacity: .55; stroke: currentColor; stroke-opacity: .28; stroke-width: .8; }
+.dg-cell-a { fill: var(--color-accent);  fill-opacity: .50; stroke: currentColor; stroke-opacity: .28; stroke-width: .8; }
+.dg-cell-x { fill: var(--color-accent);  fill-opacity: .18; stroke: currentColor; stroke-opacity: .25; stroke-width: .8; }
+
+/* 异或圆 */
+.dg-xor { fill: var(--glass-light); stroke: currentColor; stroke-opacity: .40; stroke-width: 1.2; }
+.dg-op  { fill: currentColor; fill-opacity: .85; font-size: 15px; }
+
+/* ============================================
    移动端
    ============================================ */
 @media (max-width: 768px) {

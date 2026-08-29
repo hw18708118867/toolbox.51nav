@@ -6,6 +6,7 @@ description: "深入理解 AES 加密算法的工作原理、分组模式和填�
 keywords: [AES加密, AES-256, AES-128, CBC模式, GCM模式, 对称加密原理, 分组密码, 密钥扩展]
 author: 开发工具箱
 date: 2026-06-15
+updated: 2026-08-29
 phase: 1
 relatedTools: [des, rsa, rsa-keygen]
 relatedTutorials: [des, rsa]
@@ -37,6 +38,83 @@ AES 有三种密钥长度，对应的加密轮数也不同：
 
 轮数越多安全性越高，但性能也越低。一般来说 AES-128 已经足够安全（2^128 的暴力搜索空间在可预见的未来都不现实），AES-256 主要用于合规要求或特别敏感的场景。
 
+上面那张表只说了轮数，下面这张图把整个过程从头到尾串起来——从分块、初始轮密钥加、N 轮变换、密钥扩展，一直到密文拼接输出：
+
+<figure class="dg-figure">
+<svg viewBox="0 0 820 650" role="img" aria-label="AES 加密原理总览：明文分块、轮变换与密钥扩展" text-anchor="middle" dominant-baseline="central">
+<defs><marker id="m1" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path d="M0,0 L10,5 L0,10 Z" fill="currentColor" fill-opacity=".55"/></marker><marker id="m1p" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path d="M0,0 L10,5 L0,10 Z" style="fill:var(--color-primary);fill-opacity:.85"/></marker></defs>
+<rect class="dg-box-p" x="24" y="24" width="150" height="44" rx="9"/><text class="dg-tb" x="99" y="46">明文（任意长度）</text>
+<path class="dg-line-p" d="M174,46 H202" marker-end="url(#m1p)"/>
+<rect class="dg-box" x="210" y="24" width="70" height="44" rx="9"/><text class="dg-tb" x="245" y="46">P₁</text>
+<rect class="dg-box" x="290" y="24" width="70" height="44" rx="9"/><text class="dg-tb" x="325" y="46">P₂</text>
+<rect class="dg-box" x="370" y="24" width="70" height="44" rx="9"/><text class="dg-tb" x="405" y="46">P₃</text>
+<text class="dg-t" x="452" y="46">…</text>
+<rect class="dg-box" x="470" y="24" width="70" height="44" rx="9"/><text class="dg-tb" x="505" y="46">Pₙ</text>
+<text class="dg-ts" x="566" y="40" text-anchor="start">每个块固定 128 位（16 字节）</text>
+<text class="dg-ts" x="566" y="58" text-anchor="start">最后一块不足则按 PKCS#7 填充</text>
+<path class="dg-dash" d="M245,68 V88 M325,68 V88 M405,68 V88 M505,68 V88 M245,88 H505"/>
+<path class="dg-line-p" d="M350,88 V104" marker-end="url(#m1p)"/>
+<rect class="dg-box-p" x="240" y="110" width="220" height="40" rx="9"/><text class="dg-tb" x="350" y="130">明文块 P（128 位）</text>
+<path class="dg-line" d="M350,150 V160" marker-end="url(#m1)"/>
+<rect class="dg-box-a" x="240" y="164" width="220" height="34" rx="8"/><text class="dg-t" x="350" y="181">⊕ K₀（初始轮密钥加）</text>
+<path class="dg-line" d="M350,198 V206" marker-end="url(#m1)"/>
+<rect class="dg-frame" x="180" y="210" width="340" height="68" rx="10"/><text class="dg-ts" x="188" y="226" text-anchor="start">Round 1</text>
+<rect class="dg-box" x="186" y="232" width="78" height="36" rx="7"/><text class="dg-t" x="225" y="250">SubBytes</text>
+<rect class="dg-box" x="269" y="232" width="78" height="36" rx="7"/><text class="dg-t" x="308" y="250">ShiftRows</text>
+<rect class="dg-box" x="352" y="232" width="78" height="36" rx="7"/><text class="dg-t" x="391" y="250">MixColumns</text>
+<rect class="dg-box-a" x="435" y="232" width="78" height="36" rx="7"/><text class="dg-t" x="474" y="250">⊕ K₁</text>
+<path class="dg-line" d="M350,278 V288" marker-end="url(#m1)"/>
+<rect class="dg-frame" x="180" y="292" width="340" height="68" rx="10"/><text class="dg-ts" x="188" y="308" text-anchor="start">Round 2</text>
+<rect class="dg-box" x="186" y="314" width="78" height="36" rx="7"/><text class="dg-t" x="225" y="332">SubBytes</text>
+<rect class="dg-box" x="269" y="314" width="78" height="36" rx="7"/><text class="dg-t" x="308" y="332">ShiftRows</text>
+<rect class="dg-box" x="352" y="314" width="78" height="36" rx="7"/><text class="dg-t" x="391" y="332">MixColumns</text>
+<rect class="dg-box-a" x="435" y="314" width="78" height="36" rx="7"/><text class="dg-t" x="474" y="332">⊕ K₂</text>
+<path class="dg-line" d="M350,360 V370" marker-end="url(#m1)"/>
+<text class="dg-t" x="350" y="386">⋮</text>
+<text class="dg-ts" x="350" y="404">（Round 3 ~ Round 9，结构完全相同）</text>
+<rect class="dg-frame" x="180" y="414" width="340" height="68" rx="10"/><text class="dg-ts" x="188" y="430" text-anchor="start">Round 10（最后轮）</text>
+<rect class="dg-box" x="186" y="436" width="104" height="36" rx="7"/><text class="dg-t" x="238" y="454">SubBytes</text>
+<rect class="dg-box" x="298" y="436" width="104" height="36" rx="7"/><text class="dg-t" x="350" y="454">ShiftRows</text>
+<rect class="dg-box-a" x="410" y="436" width="104" height="36" rx="7"/><text class="dg-t" x="462" y="454">⊕ K₁₀</text>
+<text class="dg-ts" x="524" y="476" text-anchor="start">最后一轮省略 MixColumns</text>
+<path class="dg-line" d="M350,482 V492" marker-end="url(#m1)"/>
+<rect class="dg-box-p" x="240" y="492" width="220" height="40" rx="9"/><text class="dg-tb" x="350" y="512">密文块 C（128 位）</text>
+<path class="dg-dash" d="M350,532 V546 M250,546 H515"/>
+<path class="dg-line" d="M250,546 V562" marker-end="url(#m1)"/>
+<path class="dg-line" d="M330,546 V562" marker-end="url(#m1)"/>
+<path class="dg-line" d="M410,546 V562" marker-end="url(#m1)"/>
+<path class="dg-line" d="M515,546 V562" marker-end="url(#m1)"/>
+<rect class="dg-box" x="215" y="566" width="70" height="44" rx="9"/><text class="dg-tb" x="250" y="588">C₁</text>
+<rect class="dg-box" x="295" y="566" width="70" height="44" rx="9"/><text class="dg-tb" x="330" y="588">C₂</text>
+<rect class="dg-box" x="375" y="566" width="70" height="44" rx="9"/><text class="dg-tb" x="410" y="588">C₃</text>
+<text class="dg-t" x="452" y="588">…</text>
+<rect class="dg-box" x="480" y="566" width="70" height="44" rx="9"/><text class="dg-tb" x="515" y="588">Cₙ</text>
+<path class="dg-line-p" d="M550,588 H586" marker-end="url(#m1p)"/>
+<rect class="dg-box-p" x="590" y="566" width="170" height="44" rx="9"/><text class="dg-tb" x="675" y="588">密文</text>
+<text class="dg-t" x="90" y="214">状态矩阵 State</text>
+<rect class="dg-cell" x="50" y="228" width="80" height="80" rx="3"/>
+<rect class="dg-cell-p" x="50" y="228" width="20" height="20"/><rect class="dg-cell-p" x="50" y="248" width="20" height="20"/><rect class="dg-cell-p" x="50" y="268" width="20" height="20"/><rect class="dg-cell-p" x="50" y="288" width="20" height="20"/>
+<path class="dg-cell" d="M70,228 V308 M90,228 V308 M110,228 V308 M50,248 H130 M50,268 H130 M50,288 H130"/>
+<text class="dg-ts" x="90" y="326">16 字节按列填入</text>
+<text class="dg-ts" x="90" y="342">每轮都在这 16 个字节上</text>
+<text class="dg-ts" x="90" y="358">反复做替换与置换</text>
+<path class="dg-dash" d="M130,268 H176" marker-end="url(#m1)"/>
+<rect class="dg-box-a" x="600" y="110" width="190" height="44" rx="9"/><text class="dg-tb" x="695" y="126">主密钥 K</text><text class="dg-ts" x="695" y="144">128 / 192 / 256 位</text>
+<path class="dg-line-p" d="M695,154 V162" marker-end="url(#m1p)"/>
+<rect class="dg-box-a" x="600" y="166" width="190" height="44" rx="9"/><text class="dg-tb" x="695" y="186">密钥扩展 Key Expansion</text><text class="dg-ts" x="695" y="204">单向派生，推不回主密钥</text>
+<path class="dg-dash" d="M695,210 V454"/>
+<path class="dg-line-p" d="M598,181 H468" marker-end="url(#m1p)"/><text class="dg-ts" x="610" y="174">K₀</text>
+<path class="dg-line-p" d="M691,250 H520" marker-end="url(#m1p)"/><text class="dg-ts" x="606" y="243">K₁</text>
+<path class="dg-line-p" d="M691,332 H520" marker-end="url(#m1p)"/><text class="dg-ts" x="606" y="325">K₂</text>
+<path class="dg-line-p" d="M691,454 H520" marker-end="url(#m1p)"/><text class="dg-ts" x="606" y="447">K₁₀</text>
+<text class="dg-t" x="695" y="398">⋮</text>
+<text class="dg-ts" x="600" y="486" text-anchor="start">每一轮使用不同的轮密钥，</text>
+<text class="dg-ts" x="600" y="502" text-anchor="start">全部由主密钥单向派生</text>
+<text class="dg-ts" x="24" y="628" text-anchor="start">AES-128：10 轮　AES-192：12 轮　AES-256：14 轮</text>
+</svg>
+<figcaption>图 1：AES 完整加密流程。明文按 128 位切块，每块先与初始轮密钥异或，再经过 N 轮变换（SubBytes → ShiftRows → MixColumns → ⊕ 轮密钥，最后一轮省略 MixColumns）；每一轮的轮密钥都来自主密钥的单向扩展。</figcaption>
+</figure>
+
 ### 每轮做了些什么？
 
 每一轮加密包含四个操作（第 10 轮省略 MixColumns）：
@@ -49,6 +127,49 @@ AES 有三种密钥长度，对应的加密轮数也不同：
 四步加起来的目的只有一个：让明文和密文的统计关系完全消失。攻击者哪怕知道加密算法，也没法从密文推断出密钥或明文。
 
 我把这个过程想象成是一个**多层搅拌机**——SubBytes 是把食材打散，ShiftRows 和 MixColumns 是横向和纵向搅拌，AddRoundKey 是加入新的调料。每多搅拌一轮，原始食材的痕迹就更少一分。
+
+用状态矩阵的视角看这一轮，会更直观。下面这张图里，我用蓝色方块跟踪 4 个字节，看它们在四步操作里怎么被搬来搬去：
+
+<figure class="dg-figure">
+<svg viewBox="0 0 820 190" role="img" aria-label="AES 单轮加密四步：SubBytes、ShiftRows、MixColumns、AddRoundKey" text-anchor="middle" dominant-baseline="central">
+<defs><marker id="m2" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path d="M0,0 L10,5 L0,10 Z" fill="currentColor" fill-opacity=".55"/></marker></defs>
+<rect class="dg-cell" x="26" y="56" width="72" height="72" rx="3"/>
+<rect class="dg-cell-p" x="26" y="56" width="18" height="18"/><rect class="dg-cell-p" x="26" y="74" width="18" height="18"/><rect class="dg-cell-p" x="26" y="92" width="18" height="18"/><rect class="dg-cell-p" x="26" y="110" width="18" height="18"/>
+<path class="dg-cell" d="M44,56 V128 M62,56 V128 M80,56 V128 M26,74 H98 M26,92 H98 M26,110 H98"/>
+<rect class="dg-cell" x="174" y="56" width="72" height="72" rx="3"/>
+<rect class="dg-cell-p" x="174" y="56" width="18" height="18"/><rect class="dg-cell-p" x="174" y="74" width="18" height="18"/><rect class="dg-cell-p" x="174" y="92" width="18" height="18"/><rect class="dg-cell-p" x="174" y="110" width="18" height="18"/>
+<path class="dg-cell" d="M192,56 V128 M210,56 V128 M228,56 V128 M174,74 H246 M174,92 H246 M174,110 H246"/>
+<rect class="dg-cell" x="322" y="56" width="72" height="72" rx="3"/>
+<rect class="dg-cell-p" x="322" y="56" width="18" height="18"/><rect class="dg-cell-p" x="376" y="74" width="18" height="18"/><rect class="dg-cell-p" x="358" y="92" width="18" height="18"/><rect class="dg-cell-p" x="340" y="110" width="18" height="18"/>
+<path class="dg-cell" d="M340,56 V128 M358,56 V128 M376,56 V128 M322,74 H394 M322,92 H394 M322,110 H394"/>
+<rect class="dg-cell" x="470" y="56" width="72" height="72" rx="3"/>
+<rect class="dg-cell-a" x="488" y="56" width="18" height="18"/><rect class="dg-cell-a" x="488" y="74" width="18" height="18"/><rect class="dg-cell-a" x="488" y="92" width="18" height="18"/><rect class="dg-cell-a" x="488" y="110" width="18" height="18"/>
+<path class="dg-cell" d="M488,56 V128 M506,56 V128 M524,56 V128 M470,74 H542 M470,92 H542 M470,110 H542"/>
+<rect class="dg-cell-x" x="618" y="56" width="72" height="72" rx="3"/>
+<rect class="dg-cell" x="618" y="56" width="72" height="72" rx="3"/>
+<path class="dg-cell" d="M636,56 V128 M654,56 V128 M672,56 V128 M618,74 H690 M618,92 H690 M618,110 H690"/>
+<path class="dg-line" d="M102,92 H170" marker-end="url(#m2)"/>
+<path class="dg-line" d="M250,92 H318" marker-end="url(#m2)"/>
+<path class="dg-line" d="M398,92 H466" marker-end="url(#m2)"/>
+<path class="dg-line" d="M546,92 H614" marker-end="url(#m2)"/>
+<text class="dg-tl" x="136" y="78">SubBytes</text><text class="dg-ts" x="136" y="110">字节替换</text>
+<text class="dg-tl" x="284" y="78">ShiftRows</text><text class="dg-ts" x="284" y="110">行移位</text>
+<text class="dg-tl" x="432" y="78">MixColumns</text><text class="dg-ts" x="432" y="110">列混合</text>
+<text class="dg-tl" x="580" y="78">AddRoundKey</text><text class="dg-ts" x="580" y="110">⊕ 轮密钥</text>
+<text class="dg-tb" x="62" y="148">输入状态</text><text class="dg-ts" x="62" y="166">16 字节明文块</text>
+<text class="dg-tb" x="210" y="148">替换后</text><text class="dg-ts" x="210" y="166">位置不变值全变</text>
+<text class="dg-tb" x="358" y="148">移位后</text><text class="dg-ts" x="358" y="166">第 n 行左移 n</text>
+<text class="dg-tb" x="506" y="148">混合后</text><text class="dg-ts" x="506" y="166">每列 4 字节混合</text>
+<text class="dg-tb" x="654" y="148">本轮输出</text><text class="dg-ts" x="654" y="166">整块 ⊕ 轮密钥 Kᵢ</text>
+<rect class="dg-cell" x="636" y="2" width="40" height="40" rx="2"/>
+<path class="dg-cell" d="M646,2 V42 M656,2 V42 M666,2 V42 M636,12 H676 M636,22 H676 M636,32 H676"/>
+<path class="dg-line" d="M656,42 V52" marker-end="url(#m2)"/>
+<text class="dg-ts" x="686" y="24" text-anchor="start">轮密钥 Kᵢ</text>
+<path class="dg-line" d="M694,92 H730" marker-end="url(#m2)"/>
+<text class="dg-ts" x="740" y="92" text-anchor="start">进入下一轮</text>
+</svg>
+<figcaption>图 2：一轮加密的四个步骤。128 位明文排成 4×4 的状态矩阵，依次做字节替换（位置不动、值全变）、行移位（第 n 行循环左移 n 字节）、列混合（每列在 GF(2⁸) 上做矩阵乘），最后与本轮轮密钥逐位异或，输出即下一轮的输入。</figcaption>
+</figure>
 
 ### 密钥扩展
 
@@ -64,11 +185,119 @@ AES 只定义了对一个 128 位块的加密方法，真实的数据远比 16 �
 
 如果你用 ECB 加密一张图片，像素模式会在密文里原样浮现出来——多年前那个"Linux 企鹅 ECB 加密后还能看清轮廓"的实验至今还在教科书里被引用。说白了，ECB 对大多数实际场景来说几乎等于没加密。我们工具里虽然支持 ECB 模式，但那更多是为了让你验证某种历史遗留系统，不是推荐你用它。
 
+原因看这张图就明白了：
+
+<figure class="dg-figure">
+<svg viewBox="0 0 840 350" role="img" aria-label="ECB 模式原理：每个块独立加密，相同明文块得到相同密文块" text-anchor="middle" dominant-baseline="central">
+<defs><marker id="m3" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path d="M0,0 L10,5 L0,10 Z" fill="currentColor" fill-opacity=".55"/></marker></defs>
+<path class="dg-dash" d="M130,44 V22 H550 V44"/>
+<text class="dg-ts" x="340" y="12">P₁ 与 P₃ 的明文完全相同</text>
+<rect class="dg-box-p" x="40" y="44" width="180" height="56" rx="10"/><text class="dg-tb" x="130" y="66">明文块 P₁</text><text class="dg-ts" x="130" y="86">内容：AAAAAAAA</text>
+<rect class="dg-box" x="250" y="44" width="180" height="56" rx="10"/><text class="dg-tb" x="340" y="66">明文块 P₂</text><text class="dg-ts" x="340" y="86">内容：BBBBBBBB</text>
+<rect class="dg-box-p" x="460" y="44" width="180" height="56" rx="10"/><text class="dg-tb" x="550" y="66">明文块 P₃</text><text class="dg-ts" x="550" y="86">内容：AAAAAAAA</text>
+<path class="dg-line" d="M130,100 V136" marker-end="url(#m3)"/>
+<path class="dg-line" d="M340,100 V136" marker-end="url(#m3)"/>
+<path class="dg-line" d="M550,100 V136" marker-end="url(#m3)"/>
+<rect class="dg-box" x="40" y="140" width="180" height="56" rx="10"/><text class="dg-tb" x="130" y="162">AES 加密</text><text class="dg-ts" x="130" y="182">密钥 K（同一把）</text>
+<rect class="dg-box" x="250" y="140" width="180" height="56" rx="10"/><text class="dg-tb" x="340" y="162">AES 加密</text><text class="dg-ts" x="340" y="182">密钥 K（同一把）</text>
+<rect class="dg-box" x="460" y="140" width="180" height="56" rx="10"/><text class="dg-tb" x="550" y="162">AES 加密</text><text class="dg-ts" x="550" y="182">密钥 K（同一把）</text>
+<path class="dg-line" d="M130,196 V232" marker-end="url(#m3)"/>
+<path class="dg-line" d="M340,196 V232" marker-end="url(#m3)"/>
+<path class="dg-line" d="M550,196 V232" marker-end="url(#m3)"/>
+<rect class="dg-box-a" x="40" y="236" width="180" height="56" rx="10"/><text class="dg-tb" x="130" y="258">密文块 C₁</text><text class="dg-ts" x="130" y="278">7f3a9c…（与 C₃ 相同）</text>
+<rect class="dg-box" x="250" y="236" width="180" height="56" rx="10"/><text class="dg-tb" x="340" y="258">密文块 C₂</text><text class="dg-ts" x="340" y="278">b21e40…</text>
+<rect class="dg-box-a" x="460" y="236" width="180" height="56" rx="10"/><text class="dg-tb" x="550" y="258">密文块 C₃</text><text class="dg-ts" x="550" y="278">7f3a9c…（与 C₁ 相同）</text>
+<path class="dg-dash" d="M130,292 V314 H550 V292"/>
+<text class="dg-ts" x="340" y="330">→ 密文块也完全相同：明文的重复结构被完整保留下来</text>
+<g transform="translate(716,44) scale(11)">
+<rect x="0" y="0" width="6" height="6" fill="none" stroke="currentColor" stroke-opacity=".32" stroke-width=".09"/>
+<path d="M2,0h2v1h-2z M1,1h4v1h-4z M1,2h4v1h-4z M0,3h6v1h-6z M1,4h4v1h-4z M2,5h2v1h-2z" style="fill:var(--color-primary);fill-opacity:.6"/>
+<path d="M1,0v6 M2,0v6 M3,0v6 M4,0v6 M5,0v6 M0,1h6 M0,2h6 M0,3h6 M0,4h6 M0,5h6" fill="none" stroke="currentColor" stroke-opacity=".25" stroke-width=".09"/>
+</g>
+<path class="dg-line" d="M749,110 V126" marker-end="url(#m3)"/>
+<g transform="translate(716,130) scale(11)">
+<rect x="0" y="0" width="6" height="6" fill="none" stroke="currentColor" stroke-opacity=".32" stroke-width=".09"/>
+<path d="M2,0h2v1h-2z M1,1h4v1h-4z M1,2h4v1h-4z M0,3h6v1h-6z M1,4h4v1h-4z M2,5h2v1h-2z" style="fill:var(--color-accent);fill-opacity:.55"/>
+<path d="M1,0v6 M2,0v6 M3,0v6 M4,0v6 M5,0v6 M0,1h6 M0,2h6 M0,3h6 M0,4h6 M0,5h6" fill="none" stroke="currentColor" stroke-opacity=".25" stroke-width=".09"/>
+</g>
+<text class="dg-ts" x="790" y="77" text-anchor="start">原图</text>
+<text class="dg-ts" x="790" y="163" text-anchor="start">ECB 后</text>
+<text class="dg-ts" x="749" y="216">图案结构完整保留</text>
+<text class="dg-ts" x="749" y="232">只是换了个颜色</text>
+</svg>
+<figcaption>图 3：ECB 模式。每个块用同一把密钥独立加密、互不影响，于是相同的明文块必然得到相同的密文块。右边就是教科书里那个著名的实验：整张图用 ECB 加密后，颜色变了，企鹅的轮廓却依然清晰可见。</figcaption>
+</figure>
+
 ### CBC（密码块链接模式）
 
 CBC 改进了一个关键点：**每个块的加密结果会影响下一个块**。在加密当前块之前，先把前一个块的密文和当前块的明文做 XOR。第一个块没有前一个密文怎么办？用一个叫 IV（初始化向量）的随机数顶替。
 
 这样，哪怕两个块明文完全一样，只要位置不同，密文就不同。
+
+<figure class="dg-figure">
+<svg viewBox="0 0 840 630" role="img" aria-label="CBC 模式原理图：加密与解密的链式结构" text-anchor="middle" dominant-baseline="central">
+<defs><marker id="m4" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path d="M0,0 L10,5 L0,10 Z" fill="currentColor" fill-opacity=".55"/></marker><marker id="m4p" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path d="M0,0 L10,5 L0,10 Z" style="fill:var(--color-primary);fill-opacity:.85"/></marker><marker id="m4a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path d="M0,0 L10,5 L0,10 Z" style="fill:var(--color-accent);fill-opacity:.85"/></marker></defs>
+<text class="dg-tb" x="24" y="22" text-anchor="start">（a）CBC 加密</text>
+<rect class="dg-box-p" x="150" y="40" width="90" height="40" rx="8"/><text class="dg-tb" x="195" y="60">明文块 P₁</text>
+<rect class="dg-box-p" x="390" y="40" width="90" height="40" rx="8"/><text class="dg-tb" x="435" y="60">明文块 P₂</text>
+<rect class="dg-box-p" x="630" y="40" width="90" height="40" rx="8"/><text class="dg-tb" x="675" y="60">明文块 P₃</text>
+<rect class="dg-box" x="24" y="110" width="90" height="40" rx="8"/><text class="dg-tb" x="69" y="130">IV</text>
+<text class="dg-ts" x="69" y="158">随机、不可预测</text>
+<text class="dg-ts" x="69" y="174">无需保密但不能重用</text>
+<path class="dg-line-p" d="M118,130 H178" marker-end="url(#m4p)"/>
+<path class="dg-line" d="M195,80 V112" marker-end="url(#m4)"/>
+<path class="dg-line" d="M435,80 V112" marker-end="url(#m4)"/>
+<path class="dg-line" d="M675,80 V112" marker-end="url(#m4)"/>
+<circle class="dg-xor" cx="195" cy="130" r="16"/><text class="dg-op" x="195" y="130">⊕</text>
+<circle class="dg-xor" cx="435" cy="130" r="16"/><text class="dg-op" x="435" y="130">⊕</text>
+<circle class="dg-xor" cx="675" cy="130" r="16"/><text class="dg-op" x="675" y="130">⊕</text>
+<path class="dg-line" d="M195,146 V166" marker-end="url(#m4)"/>
+<path class="dg-line" d="M435,146 V166" marker-end="url(#m4)"/>
+<path class="dg-line" d="M675,146 V166" marker-end="url(#m4)"/>
+<rect class="dg-box" x="150" y="170" width="90" height="44" rx="8"/><text class="dg-tb" x="195" y="186">AES 加密</text><text class="dg-ts" x="195" y="202">密钥 K</text>
+<rect class="dg-box" x="390" y="170" width="90" height="44" rx="8"/><text class="dg-tb" x="435" y="186">AES 加密</text><text class="dg-ts" x="435" y="202">密钥 K</text>
+<rect class="dg-box" x="630" y="170" width="90" height="44" rx="8"/><text class="dg-tb" x="675" y="186">AES 加密</text><text class="dg-ts" x="675" y="202">密钥 K</text>
+<path class="dg-line" d="M195,214 V246" marker-end="url(#m4)"/>
+<path class="dg-line" d="M435,214 V246" marker-end="url(#m4)"/>
+<path class="dg-line" d="M675,214 V246" marker-end="url(#m4)"/>
+<rect class="dg-box-a" x="150" y="250" width="90" height="40" rx="8"/><text class="dg-tb" x="195" y="270">密文块 C₁</text>
+<rect class="dg-box-a" x="390" y="250" width="90" height="40" rx="8"/><text class="dg-tb" x="435" y="270">密文块 C₂</text>
+<rect class="dg-box-a" x="630" y="250" width="90" height="40" rx="8"/><text class="dg-tb" x="675" y="270">密文块 C₃</text>
+<path class="dg-line-a" d="M240,270 H330 V130 H415" marker-end="url(#m4a)"/>
+<path class="dg-line-a" d="M480,270 H570 V130 H655" marker-end="url(#m4a)"/>
+<text class="dg-ts" x="332" y="196" text-anchor="start">上一块密文</text>
+<path class="dg-dash" d="M24,318 H816"/>
+<text class="dg-tb" x="24" y="342" text-anchor="start">（b）CBC 解密</text>
+<rect class="dg-box-a" x="150" y="360" width="90" height="40" rx="8"/><text class="dg-tb" x="195" y="380">密文块 C₁</text>
+<rect class="dg-box-a" x="390" y="360" width="90" height="40" rx="8"/><text class="dg-tb" x="435" y="380">密文块 C₂</text>
+<rect class="dg-box-a" x="630" y="360" width="90" height="40" rx="8"/><text class="dg-tb" x="675" y="380">密文块 C₃</text>
+<path class="dg-line" d="M195,400 V426" marker-end="url(#m4)"/>
+<path class="dg-line" d="M435,400 V426" marker-end="url(#m4)"/>
+<path class="dg-line" d="M675,400 V426" marker-end="url(#m4)"/>
+<rect class="dg-box" x="150" y="430" width="90" height="44" rx="8"/><text class="dg-tb" x="195" y="446">AES 解密</text><text class="dg-ts" x="195" y="462">密钥 K</text>
+<rect class="dg-box" x="390" y="430" width="90" height="44" rx="8"/><text class="dg-tb" x="435" y="446">AES 解密</text><text class="dg-ts" x="435" y="462">密钥 K</text>
+<rect class="dg-box" x="630" y="430" width="90" height="44" rx="8"/><text class="dg-tb" x="675" y="446">AES 解密</text><text class="dg-ts" x="675" y="462">密钥 K</text>
+<path class="dg-line" d="M195,474 V502" marker-end="url(#m4)"/>
+<path class="dg-line" d="M435,474 V502" marker-end="url(#m4)"/>
+<path class="dg-line" d="M675,474 V502" marker-end="url(#m4)"/>
+<circle class="dg-xor" cx="195" cy="520" r="16"/><text class="dg-op" x="195" y="520">⊕</text>
+<circle class="dg-xor" cx="435" cy="520" r="16"/><text class="dg-op" x="435" y="520">⊕</text>
+<circle class="dg-xor" cx="675" cy="520" r="16"/><text class="dg-op" x="675" y="520">⊕</text>
+<rect class="dg-box" x="24" y="500" width="90" height="40" rx="8"/><text class="dg-tb" x="69" y="520">IV</text>
+<path class="dg-line-p" d="M118,520 H178" marker-end="url(#m4p)"/>
+<path class="dg-line" d="M195,536 V556" marker-end="url(#m4)"/>
+<path class="dg-line" d="M435,536 V556" marker-end="url(#m4)"/>
+<path class="dg-line" d="M675,536 V556" marker-end="url(#m4)"/>
+<rect class="dg-box-p" x="150" y="560" width="90" height="40" rx="8"/><text class="dg-tb" x="195" y="580">明文块 P₁</text>
+<rect class="dg-box-p" x="390" y="560" width="90" height="40" rx="8"/><text class="dg-tb" x="435" y="580">明文块 P₂</text>
+<rect class="dg-box-p" x="630" y="560" width="90" height="40" rx="8"/><text class="dg-tb" x="675" y="580">明文块 P₃</text>
+<path class="dg-line-a" d="M240,380 H330 V520 H415" marker-end="url(#m4a)"/>
+<path class="dg-line-a" d="M480,380 H570 V520 H655" marker-end="url(#m4a)"/>
+<text class="dg-ts" x="332" y="485" text-anchor="start">上一块密文</text>
+<text class="dg-ts" x="69" y="556" text-anchor="start">同一个 IV</text>
+</svg>
+<figcaption>图 4：CBC 模式。加密时每块先与上一个密文块（第一块用 IV）异或再走 AES，所以加密必须串行、无法并行；解密时密文块是已知的，可以并行计算，代价是一个块损坏会波及相邻两个块。注意它只保证机密性，没有任何完整性校验。</figcaption>
+</figure>
 
 但 CBC 有一个致命问题：它没有内置完整性校验，可以被 padding oracle 攻击。换句话说，别人可以篡改你的 CBC 密文，而你解密时毫无察觉。
 
@@ -79,6 +308,68 @@ CBC 改进了一个关键点：**每个块的加密结果会影响下一个块**
 翻译成人话：GCM 不仅能保证机密性，还能检测密文是否被篡改。如果有人动了你的密文哪怕一个字节，认证标签就对不上了，你能立刻知道数据被改过。
 
 这也是为什么 TLS 1.3 强制使用 AEAD 模式——光加密不够，还得验证完整性。
+
+<figure class="dg-figure">
+<svg viewBox="0 0 840 520" role="img" aria-label="GCM 模式原理图：CTR 加密与 GHASH 认证标签计算" text-anchor="middle" dominant-baseline="central">
+<defs><marker id="m5" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path d="M0,0 L10,5 L0,10 Z" fill="currentColor" fill-opacity=".55"/></marker><marker id="m5p" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path d="M0,0 L10,5 L0,10 Z" style="fill:var(--color-primary);fill-opacity:.85"/></marker><marker id="m5a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path d="M0,0 L10,5 L0,10 Z" style="fill:var(--color-accent);fill-opacity:.85"/></marker></defs>
+<rect class="dg-box" x="24" y="24" width="190" height="44" rx="9"/><text class="dg-tb" x="119" y="42">Nonce / IV</text><text class="dg-ts" x="119" y="60">12 字节，绝对不可重用</text>
+<rect class="dg-box-p" x="24" y="100" width="190" height="44" rx="9"/><text class="dg-tb" x="119" y="118">密钥 K</text><text class="dg-ts" x="119" y="136">所有块共用同一把</text>
+<rect class="dg-box-a" x="24" y="176" width="190" height="44" rx="9"/><text class="dg-tb" x="119" y="194">H = AES(K, 0¹²⁸)</text><text class="dg-ts" x="119" y="212">GHASH 子密钥</text>
+<rect class="dg-box" x="24" y="252" width="190" height="44" rx="9"/><text class="dg-tb" x="119" y="270">AAD 附加数据</text><text class="dg-ts" x="119" y="288">可选，只认证不加密</text>
+<text class="dg-ts" x="270" y="10" text-anchor="start">CTRᵢ = Nonce ‖ 32 位计数器（每块 +1）</text>
+<rect class="dg-box" x="270" y="24" width="110" height="40" rx="8"/><text class="dg-tb" x="325" y="44">CTR₁</text>
+<rect class="dg-box" x="445" y="24" width="110" height="40" rx="8"/><text class="dg-tb" x="500" y="44">CTR₂</text>
+<rect class="dg-box" x="620" y="24" width="110" height="40" rx="8"/><text class="dg-tb" x="675" y="44">CTR₃</text>
+<path class="dg-dash" d="M380,44 H441" marker-end="url(#m5)"/>
+<path class="dg-dash" d="M555,44 H616" marker-end="url(#m5)"/>
+<path class="dg-line-p" d="M214,46 H266" marker-end="url(#m5p)"/>
+<path class="dg-line-p" d="M214,122 H240 V96 H266" marker-end="url(#m5p)"/>
+<rect class="dg-box-p" x="270" y="86" width="110" height="40" rx="8"/><text class="dg-tb" x="325" y="106">AES 加密 K</text>
+<rect class="dg-box-p" x="445" y="86" width="110" height="40" rx="8"/><text class="dg-tb" x="500" y="106">AES 加密 K</text>
+<rect class="dg-box-p" x="620" y="86" width="110" height="40" rx="8"/><text class="dg-tb" x="675" y="106">AES 加密 K</text>
+<path class="dg-dash" d="M380,116 H441" marker-end="url(#m5)"/>
+<path class="dg-dash" d="M555,116 H616" marker-end="url(#m5)"/>
+<text class="dg-ts" x="620" y="78" text-anchor="start">各块互不依赖，可并行计算</text>
+<rect class="dg-box-a" x="270" y="148" width="110" height="34" rx="8"/><text class="dg-tb" x="325" y="165">S₁</text>
+<rect class="dg-box-a" x="445" y="148" width="110" height="34" rx="8"/><text class="dg-tb" x="500" y="165">S₂</text>
+<rect class="dg-box-a" x="620" y="148" width="110" height="34" rx="8"/><text class="dg-tb" x="675" y="165">S₃</text>
+<text class="dg-ts" x="752" y="165" text-anchor="start">密钥流</text>
+<path class="dg-line" d="M325,182 V204" marker-end="url(#m5)"/>
+<path class="dg-line" d="M500,182 V204" marker-end="url(#m5)"/>
+<path class="dg-line" d="M675,182 V204" marker-end="url(#m5)"/>
+<circle class="dg-xor" cx="325" cy="222" r="15"/><text class="dg-op" x="325" y="222">⊕</text>
+<circle class="dg-xor" cx="500" cy="222" r="15"/><text class="dg-op" x="500" y="222">⊕</text>
+<circle class="dg-xor" cx="675" cy="222" r="15"/><text class="dg-op" x="675" y="222">⊕</text>
+<path class="dg-line-p" d="M342,222 H366" marker-end="url(#m5p)"/>
+<path class="dg-line-p" d="M517,222 H541" marker-end="url(#m5p)"/>
+<path class="dg-line-p" d="M692,222 H716" marker-end="url(#m5p)"/>
+<rect class="dg-box-p" x="370" y="205" width="110" height="34" rx="8"/><text class="dg-tb" x="425" y="222">C₁</text>
+<rect class="dg-box-p" x="545" y="205" width="110" height="34" rx="8"/><text class="dg-tb" x="600" y="222">C₂</text>
+<rect class="dg-box-p" x="720" y="205" width="110" height="34" rx="8"/><text class="dg-tb" x="775" y="222">C₃</text>
+<text class="dg-ts" x="775" y="190" text-anchor="start">密文块</text>
+<rect class="dg-box" x="270" y="252" width="110" height="34" rx="8"/><text class="dg-tb" x="325" y="269">P₁</text>
+<rect class="dg-box" x="445" y="252" width="110" height="34" rx="8"/><text class="dg-tb" x="500" y="269">P₂</text>
+<rect class="dg-box" x="620" y="252" width="110" height="34" rx="8"/><text class="dg-tb" x="675" y="269">P₃</text>
+<text class="dg-ts" x="752" y="269" text-anchor="start">明文块</text>
+<path class="dg-line" d="M325,250 V240" marker-end="url(#m5)"/>
+<path class="dg-line" d="M500,250 V240" marker-end="url(#m5)"/>
+<path class="dg-line" d="M675,250 V240" marker-end="url(#m5)"/>
+<path class="dg-line" d="M425,239 V326" marker-end="url(#m5)"/>
+<path class="dg-line" d="M600,239 V326" marker-end="url(#m5)"/>
+<path class="dg-line" d="M775,239 V326" marker-end="url(#m5)"/>
+<rect class="dg-box-a" x="270" y="330" width="560" height="44" rx="9"/><text class="dg-tb" x="550" y="348">GHASH(H)：AAD ‖ C₁ ‖ C₂ ‖ C₃ ‖ 长度</text><text class="dg-ts" x="550" y="366">在 GF(2¹²⁸) 上做带密钥的认证计算</text>
+<path class="dg-line-a" d="M214,198 H236 V352 H266" marker-end="url(#m5a)"/>
+<path class="dg-line-a" d="M214,274 H226 V362 H266" marker-end="url(#m5a)"/>
+<path class="dg-line" d="M550,374 V402" marker-end="url(#m5)"/>
+<rect class="dg-box-a" x="430" y="406" width="140" height="34" rx="8"/><text class="dg-tb" x="500" y="423">⊕ S₀</text>
+<text class="dg-ts" x="500" y="456">S₀ = 计数器 0 的密钥流</text>
+<path class="dg-line" d="M500,440 V458" marker-end="url(#m5)"/>
+<rect class="dg-box-g" x="400" y="462" width="200" height="44" rx="9"/><text class="dg-tb" x="500" y="484">认证标签 Tag</text>
+<text class="dg-ts" x="620" y="478" text-anchor="start">解密时先验 Tag，</text>
+<text class="dg-ts" x="620" y="494" text-anchor="start">不匹配直接拒绝解密</text>
+</svg>
+<figcaption>图 5：GCM 模式。计数器块经 AES 加密产生密钥流，与明文块异或得到密文——各块互不依赖，可以并行；同时用 GHASH 把 AAD、所有密文块和长度一起算出认证标签。密文被改动一个字节，标签就对不上，解密方立刻能发现。</figcaption>
+</figure>
 
 ## 核心特性
 
