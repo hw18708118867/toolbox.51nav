@@ -193,6 +193,14 @@ const faqLd = faqs.length
   <script type="application/ld+json" set:html={JSON.stringify(jsonLd)}></script>
   <script type="application/ld+json" set:html={JSON.stringify(breadcrumbLd)}></script>
   {faqLd && <script type="application/ld+json" set:html={JSON.stringify(faqLd)}></script>}
+
+  {/* 原理图播放器：给带 data-steps 的 <figure class="dg-figure"> 挂上播放控件 */}
+  <script>
+    import { initDiagramPlayers } from '../lib/diagram-player';
+
+    initDiagramPlayers();
+    document.addEventListener('astro:after-swap', () => initDiagramPlayers());
+  </script>
 </BaseLayout>
 
 <style>

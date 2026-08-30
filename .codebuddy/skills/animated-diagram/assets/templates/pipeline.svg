@@ -1,0 +1,44 @@
+<!--
+  模板：流水线式（可播放）
+  适用：数据从输入到输出，经过若干串行/并行阶段的流程
+        （如 AES 全流程、GCM 的 CTR+GHASH、哈希的压缩函数链）
+
+  用法：
+  1. 复制整个 <figure> 到 Markdown 正文
+  2. 改 data-steps（步骤数 = 阶段数，含输入与输出）
+  3. 按步骤把元素搬进对应的 <g data-step="N">
+  4. 把 m9 / m9p 改成全页唯一的 id（建议 m<图号> / m<图号>p）
+  5. 调 viewBox 高度 = 内容底部 + 24
+  约定：
+  - 方块分组用 class="dg-pop"，连线单独拆一个 <g data-step="N" data-flow="1">
+  - 坐标：列间距 175，行间距 80，标准方块宽 110 高 40
+  - <figure> 内部不要有空行
+-->
+<figure class="dg-figure" data-interval="2000" data-steps='[{"t":"输入","d":"待处理的数据进入流水线。"},{"t":"阶段一","d":"第一个处理阶段做了什么。"},{"t":"阶段二","d":"第二个处理阶段做了什么。"},{"t":"输出","d":"最终产物。"}]'>
+<svg viewBox="0 0 840 300" role="img" aria-label="TODO：用一句话描述这张图" text-anchor="middle" dominant-baseline="central">
+<defs>
+<marker id="m9" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path d="M0,0 L10,5 L0,10 Z" fill="currentColor" fill-opacity=".55"/></marker>
+<marker id="m9p" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path d="M0,0 L10,5 L0,10 Z" style="fill:var(--color-primary);fill-opacity:.85"/></marker>
+</defs>
+<!-- 步骤 0：输入 -->
+<g class="dg-pop" data-step="0">
+<rect class="dg-box-p" x="365" y="24" width="110" height="40" rx="8"/><text class="dg-tb" x="420" y="44">输入</text>
+</g>
+<g data-step="1" data-flow="1"><path class="dg-line-p" d="M420,64 V96" marker-end="url(#m9p)"/></g>
+<!-- 步骤 1：阶段一 -->
+<g class="dg-pop" data-step="1">
+<rect class="dg-box" x="365" y="100" width="110" height="40" rx="8"/><text class="dg-tb" x="420" y="120">阶段一</text>
+</g>
+<g data-step="2" data-flow="1"><path class="dg-line" d="M420,140 V172" marker-end="url(#m9)"/></g>
+<!-- 步骤 2：阶段二 -->
+<g class="dg-pop" data-step="2">
+<rect class="dg-box" x="365" y="176" width="110" height="40" rx="8"/><text class="dg-tb" x="420" y="196">阶段二</text>
+</g>
+<g data-step="3" data-flow="1"><path class="dg-line-p" d="M420,216 V248" marker-end="url(#m9p)"/></g>
+<!-- 步骤 3：输出 -->
+<g class="dg-pop" data-step="3">
+<rect class="dg-box-g" x="365" y="252" width="110" height="40" rx="8"/><text class="dg-tb" x="420" y="272">输出</text>
+</g>
+</svg>
+<figcaption>图 N：TODO 概括这张图讲了什么。点上面的「播放」可以看一步步的演示。</figcaption>
+</figure>

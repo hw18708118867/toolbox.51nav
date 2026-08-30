@@ -1,0 +1,27 @@
+<!--
+  模板：纯静态图（不带播放按钮）
+  适用：结构关系、层级、对照表这类「一眼看全」的图，
+        拆成分步动画反而会破坏整体感
+
+  用法：
+  1. 复制整个 <figure> 到 Markdown 正文
+  2. 删掉不需要的节点，调整坐标
+  3. 把 m9 改成全页唯一 id
+  4. 调 viewBox 高度 = 内容底部 + 24
+  注意：这里【不要】写 data-steps，否则播放器会给它加上控制条
+-->
+<figure class="dg-figure">
+<svg viewBox="0 0 840 260" role="img" aria-label="TODO：用一句话描述这张图" text-anchor="middle" dominant-baseline="central">
+<defs><marker id="m9" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path d="M0,0 L10,5 L0,10 Z" fill="currentColor" fill-opacity=".55"/></marker></defs>
+<rect class="dg-box-p" x="365" y="24" width="110" height="44" rx="9"/><text class="dg-tb" x="420" y="40">根节点</text><text class="dg-ts" x="420" y="58">TODO</text>
+<path class="dg-dash" d="M420,68 V88 M195,88 H645"/>
+<path class="dg-line" d="M195,88 V116" marker-end="url(#m9)"/>
+<path class="dg-line" d="M420,88 V116" marker-end="url(#m9)"/>
+<path class="dg-line" d="M645,88 V116" marker-end="url(#m9)"/>
+<rect class="dg-box" x="140" y="120" width="110" height="44" rx="8"/><text class="dg-tb" x="195" y="136">子节点 A</text><text class="dg-ts" x="195" y="154">TODO</text>
+<rect class="dg-box" x="365" y="120" width="110" height="44" rx="8"/><text class="dg-tb" x="420" y="136">子节点 B</text><text class="dg-ts" x="420" y="154">TODO</text>
+<rect class="dg-box" x="590" y="120" width="110" height="44" rx="8"/><text class="dg-tb" x="645" y="136">子节点 C</text><text class="dg-ts" x="645" y="154">TODO</text>
+<rect class="dg-frame" x="120" y="196" width="610" height="40" rx="9"/><text class="dg-ts" x="425" y="216">TODO 通栏注释</text>
+</svg>
+<figcaption>图 N：TODO 概括这张图讲了什么。</figcaption>
+</figure>

@@ -1,0 +1,46 @@
+<!--
+  模板：分支对比式（可播放）
+  适用：同一份输入走不同分支、或正确做法 vs 错误做法的对比
+        （如 ECB vs CBC、HTTP vs HTTPS、同步 vs 异步）
+
+  用法：
+  1. 复制整个 <figure> 到 Markdown 正文
+  2. 每个分支一列，data-steps 按「输入 → 分支A → 分支B → 结论」编排
+  3. 结论行用 dg-box-g（推荐方案）或 dg-box-w（风险/反例）做通栏提示条
+  4. 把 m9 / m9p 改成全页唯一 id
+  约定：
+  - 分支列间距保持对称，输入块居中在两列上方
+  - 提示条宽度覆盖所有分支列，y 放在最底部
+-->
+<figure class="dg-figure" data-interval="2100" data-steps='[{"t":"同一份输入","d":"两份完全相同的输入数据。"},{"t":"方案 A","d":"A 方案的处理方式与结果。"},{"t":"方案 B","d":"B 方案的处理方式与结果，与 A 的差异在哪。"},{"t":"结论","d":"该选哪个，为什么。"}]'>
+<svg viewBox="0 0 840 340" role="img" aria-label="TODO：用一句话描述这张图" text-anchor="middle" dominant-baseline="central">
+<defs>
+<marker id="m9" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path d="M0,0 L10,5 L0,10 Z" fill="currentColor" fill-opacity=".55"/></marker>
+<marker id="m9p" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path d="M0,0 L10,5 L0,10 Z" style="fill:var(--color-primary);fill-opacity:.85"/></marker>
+</defs>
+<!-- 步骤 0：输入 -->
+<g class="dg-pop" data-step="0">
+<rect class="dg-box-p" x="365" y="24" width="110" height="44" rx="9"/><text class="dg-tb" x="420" y="40">输入数据</text><text class="dg-ts" x="420" y="58">两条分支完全相同</text>
+<path class="dg-dash" d="M420,68 V88 M195,88 H645"/>
+</g>
+<g data-step="1" data-flow="1"><path class="dg-line" d="M195,88 V116" marker-end="url(#m9)"/></g>
+<g data-step="2" data-flow="1"><path class="dg-line" d="M645,88 V116" marker-end="url(#m9)"/></g>
+<!-- 步骤 1：方案 A（左列） -->
+<g class="dg-pop" data-step="1">
+<rect class="dg-box" x="140" y="120" width="110" height="44" rx="8"/><text class="dg-tb" x="195" y="136">方案 A</text><text class="dg-ts" x="195" y="154">TODO 特点</text>
+<path class="dg-line" d="M195,164 V192" marker-end="url(#m9)"/>
+<rect class="dg-box-a" x="140" y="196" width="110" height="44" rx="8"/><text class="dg-tb" x="195" y="212">结果 A</text><text class="dg-ts" x="195" y="230">TODO</text>
+</g>
+<!-- 步骤 2：方案 B（右列） -->
+<g class="dg-pop" data-step="2">
+<rect class="dg-box" x="590" y="120" width="110" height="44" rx="8"/><text class="dg-tb" x="645" y="136">方案 B</text><text class="dg-ts" x="645" y="154">TODO 特点</text>
+<path class="dg-line" d="M645,164 V192" marker-end="url(#m9)"/>
+<rect class="dg-box-a" x="590" y="196" width="110" height="44" rx="8"/><text class="dg-tb" x="645" y="212">结果 B</text><text class="dg-ts" x="645" y="230">TODO</text>
+</g>
+<!-- 步骤 3：结论通栏提示条 -->
+<g class="dg-pop" data-step="3">
+<rect class="dg-box-g" x="140" y="264" width="560" height="52" rx="9"/><text class="dg-tb" x="420" y="282">✓ 结论：TODO 该选哪个，一句话理由</text><text class="dg-ts" x="420" y="300">TODO 补充说明</text>
+</g>
+</svg>
+<figcaption>图 N：TODO 概括这张图讲了什么。点上面的「播放」可以看两条分支的差异。</figcaption>
+</figure>

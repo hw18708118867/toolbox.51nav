@@ -25,6 +25,73 @@ DES 最了不起的地方不在于它多安全，而在于它**把密码学从�
 
 DES 属于**分组密码**（Block Cipher），明文按 64 位（8 字节）一块进行加密。流程可以概括为：**初始置换 → 16 轮 Feistel 迭代 → 逆初始置换**。
 
+这张图把整个流程从头串到尾，点「播放」可以一步步看：
+
+<figure class="dg-figure" data-interval="2000" data-steps='[{"t":"输入明文","d":"DES 是分组密码，明文按 64 位（8 字节）一块处理。"},{"t":"初始置换 IP","d":"按一张固定表把 64 个位重新排列。这步跟密钥无关，不提供任何安全性，纯粹是 1970 年代的历史遗留。"},{"t":"密钥编排","d":"64 位密钥去掉 8 位校验后，一次性派生出 16 把 48 位轮密钥，每轮用一把。"},{"t":"分成左右两半","d":"置换后的 64 位切成 L₀ 和 R₀，各 32 位。接下来 16 轮，就在这两个半块上反复折腾。"},{"t":"Round 1","d":"R₀ 与轮密钥 K₁ 一起过 F 函数，结果和 L₀ 异或；然后左右两半交换位置。"},{"t":"Round 2 ~ Round 15","d":"结构完全相同，只是每轮换一把轮密钥。轮数越多，明文的统计特征被抹得越干净。"},{"t":"Round 16（最后一轮）","d":"换用轮密钥 K₁₆，结构依旧一样。16 轮跑完，明文和密文之间的关系已经彻底打乱。"},{"t":"合并两半","d":"把最后的 L₁₆ 和 R₁₆ 拼回成 64 位。"},{"t":"逆初始置换 IP⁻¹","d":"初始置换的逆运算，把位序还原回去。同样与密钥无关、同样不提供安全性。"},{"t":"输出密文","d":"得到 64 位密文块。注意分组只有 64 位——这正是后来 Sweet32 攻击盯上它的原因。"},{"t":"解密：换个顺序就行","d":"Feistel 结构最漂亮的地方：解密用的是完全相同的电路，只要把 16 把轮密钥倒序喂进去。"}]'>
+<svg viewBox="0 0 840 640" role="img" aria-label="DES 加密原理总览：初始置换、16 轮 Feistel 迭代与逆初始置换" text-anchor="middle" dominant-baseline="central">
+<defs><marker id="md1" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path d="M0,0 L10,5 L0,10 Z" fill="currentColor" fill-opacity=".55"/></marker><marker id="md1p" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path d="M0,0 L10,5 L0,10 Z" style="fill:var(--color-primary);fill-opacity:.85"/></marker></defs>
+<g class="dg-pop" data-step="0">
+<rect class="dg-box-p" x="240" y="24" width="220" height="40" rx="9"/><text class="dg-tb" x="350" y="44">明文（64 位分组）</text>
+</g>
+<g data-step="1" data-flow="1"><path class="dg-line-p" d="M350,64 V72" marker-end="url(#md1p)"/></g>
+<g class="dg-pop" data-step="1">
+<rect class="dg-box" x="240" y="76" width="220" height="36" rx="8"/><text class="dg-t" x="350" y="94">初始置换 IP（与密钥无关）</text>
+</g>
+<g class="dg-pop" data-step="2">
+<rect class="dg-box-a" x="600" y="76" width="190" height="44" rx="9"/><text class="dg-tb" x="695" y="90">DES 密钥</text><text class="dg-ts" x="695" y="108">64 位（含 8 位校验）</text>
+</g>
+<g data-step="2" data-flow="1"><path class="dg-line-p" d="M695,120 V128" marker-end="url(#md1p)"/></g>
+<g class="dg-pop" data-step="2">
+<rect class="dg-box-a" x="600" y="132" width="190" height="44" rx="9"/><text class="dg-tb" x="695" y="146">密钥编排</text><text class="dg-ts" x="695" y="164">生成 16 把 48 位轮密钥</text>
+<path class="dg-dash" d="M695,176 V364"/>
+<text class="dg-t" x="695" y="270">⋮</text>
+</g>
+<g data-step="3" data-flow="1"><path class="dg-line-p" d="M350,112 V120" marker-end="url(#md1p)"/></g>
+<g class="dg-pop" data-step="3">
+<rect class="dg-frame" x="240" y="124" width="220" height="58" rx="9"/><text class="dg-ts" x="250" y="136" text-anchor="start">分成左右两半 L₀ / R₀</text>
+<rect class="dg-box" x="250" y="146" width="96" height="30" rx="7"/><text class="dg-tb" x="298" y="161">L₀（32 位）</text>
+<rect class="dg-box" x="354" y="146" width="96" height="30" rx="7"/><text class="dg-tb" x="402" y="161">R₀（32 位）</text>
+</g>
+<g data-step="4" data-flow="1"><path class="dg-line-p" d="M350,182 V192" marker-end="url(#md1p)"/></g>
+<g class="dg-pop" data-step="4">
+<rect class="dg-frame" x="180" y="196" width="340" height="68" rx="10"/><text class="dg-ts" x="188" y="208" text-anchor="start">Round 1</text>
+<rect class="dg-box" x="188" y="214" width="104" height="36" rx="7"/><text class="dg-t" x="240" y="232">F 函数</text>
+<rect class="dg-box" x="298" y="214" width="104" height="36" rx="7"/><text class="dg-t" x="350" y="232">L ⊕ F</text>
+<rect class="dg-box" x="408" y="214" width="104" height="36" rx="7"/><text class="dg-t" x="460" y="232">左右交换</text>
+</g>
+<g data-step="4" data-flow="1"><path class="dg-line-p" d="M598,230 H524" marker-end="url(#md1p)"/><text class="dg-ts" x="561" y="219">K₁</text></g>
+<g data-step="5" data-flow="1"><path class="dg-line" d="M350,264 V274" marker-end="url(#md1)"/></g>
+<g class="dg-pop" data-step="5">
+<text class="dg-t" x="350" y="290">⋮</text>
+<text class="dg-ts" x="350" y="308">Round 2 ~ Round 15，结构完全相同</text>
+</g>
+<g data-step="6" data-flow="1"><path class="dg-line" d="M350,320 V326" marker-end="url(#md1)"/></g>
+<g class="dg-pop" data-step="6">
+<rect class="dg-frame" x="180" y="330" width="340" height="68" rx="10"/><text class="dg-ts" x="188" y="342" text-anchor="start">Round 16（最后一轮）</text>
+<rect class="dg-box" x="188" y="348" width="104" height="36" rx="7"/><text class="dg-t" x="240" y="366">F 函数</text>
+<rect class="dg-box" x="298" y="348" width="104" height="36" rx="7"/><text class="dg-t" x="350" y="366">L ⊕ F</text>
+<rect class="dg-box" x="408" y="348" width="104" height="36" rx="7"/><text class="dg-t" x="460" y="366">左右交换</text>
+</g>
+<g data-step="6" data-flow="1"><path class="dg-line-p" d="M598,364 H524" marker-end="url(#md1p)"/><text class="dg-ts" x="561" y="353">K₁₆</text></g>
+<g data-step="7" data-flow="1"><path class="dg-line-p" d="M350,398 V408" marker-end="url(#md1p)"/></g>
+<g class="dg-pop" data-step="7">
+<rect class="dg-box" x="240" y="412" width="220" height="40" rx="9"/><text class="dg-tb" x="350" y="432">合并 L₁₆ ‖ R₁₆</text>
+</g>
+<g data-step="8" data-flow="1"><path class="dg-line" d="M350,452 V462" marker-end="url(#md1)"/></g>
+<g class="dg-pop" data-step="8">
+<rect class="dg-box" x="240" y="466" width="220" height="40" rx="9"/><text class="dg-tb" x="350" y="486">逆初始置换 IP⁻¹</text>
+</g>
+<g data-step="9" data-flow="1"><path class="dg-line-p" d="M350,506 V516" marker-end="url(#md1p)"/></g>
+<g class="dg-pop" data-step="9">
+<rect class="dg-box-p" x="240" y="520" width="220" height="40" rx="9"/><text class="dg-tb" x="350" y="540">密文（64 位）</text>
+</g>
+<g class="dg-pop" data-step="10">
+<rect class="dg-box-a" x="140" y="580" width="560" height="44" rx="9"/><text class="dg-t" x="420" y="602">解密：结构完全相同，只需把 16 把轮密钥倒序使用</text>
+</g>
+</svg>
+<figcaption>图 1：DES 完整加密流程。明文按 64 位分块，经初始置换切成左右两半，再跑 16 轮 Feistel 迭代（每轮用一把不同的 48 位轮密钥），最后合并并做逆初始置换得到密文。点上面的「播放」可以看一步步的演示。</figcaption>
+</figure>
+
 ### Feistel 网络：DES 的灵魂
 
 Feistel 网络的设计非常对称优雅。每一轮是这样运作的：
@@ -43,6 +110,47 @@ R_i+1 = L_i XOR F(R_i, K_i)
 
 16 轮之后，把最后的 L 和 R 拼在一起，再过一次最终置换，密文就出来了。解密的时候，把轮密钥的顺序倒过来用就行——加密和解密用的是**完全相同的结构**，只不过密钥顺序反了。这在硬件实现上是个巨大的优点，加密器和解密器可以共用一套电路。
 
+把其中一轮单独放大看，就是这个样子：
+
+<figure class="dg-figure" data-interval="2300" data-steps='[{"t":"输入：上一轮的左右两半","d":"Lᵢ₋₁ 和 Rᵢ₋₁ 各 32 位，合起来就是上一轮输出的 64 位。"},{"t":"右半与轮密钥进 F 函数","d":"Rᵢ₋₁（32 位）和本轮轮密钥 Kᵢ（48 位）一起送入 F 函数，算出 32 位结果。这是整轮里唯一有密钥参与的地方。"},{"t":"F 的输出与左半异或","d":"F 的 32 位结果和 Lᵢ₋₁ 逐位异或。注意 F 函数不需要可逆——这是 Feistel 结构最巧妙的一点。"},{"t":"得到新的左右两半","d":"右半直接搬过来当新的左半，异或结果当新的右半。一轮结束，两半各 32 位。"},{"t":"解密为什么能复用","d":"靠的是 XOR 的对称性：(A ⊕ B) ⊕ B = A。把轮密钥倒序喂进同一个电路，就能一步步还原明文。"}]'>
+<svg viewBox="0 0 840 390" role="img" aria-label="Feistel 网络单轮结构：F 函数、异或与左右交换" text-anchor="middle" dominant-baseline="central">
+<defs><marker id="md2" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path d="M0,0 L10,5 L0,10 Z" fill="currentColor" fill-opacity=".55"/></marker><marker id="md2p" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path d="M0,0 L10,5 L0,10 Z" style="fill:var(--color-primary);fill-opacity:.85"/></marker></defs>
+<text class="dg-tl" x="130" y="40" text-anchor="start">第 i 轮 Feistel 迭代</text>
+<g class="dg-pop" data-step="0">
+<rect class="dg-box-p" x="130" y="76" width="90" height="40" rx="8"/><text class="dg-tb" x="175" y="88">Lᵢ₋₁</text><text class="dg-ts" x="175" y="106">32 位</text>
+<rect class="dg-box-p" x="130" y="180" width="90" height="40" rx="8"/><text class="dg-tb" x="175" y="192">Rᵢ₋₁</text><text class="dg-ts" x="175" y="210">32 位</text>
+</g>
+<g data-step="1" data-flow="1"><path class="dg-line" d="M220,200 H356" marker-end="url(#md2)"/></g>
+<g class="dg-pop" data-step="1">
+<rect class="dg-box" x="360" y="178" width="120" height="44" rx="8"/><text class="dg-tb" x="420" y="190">F 函数</text><text class="dg-ts" x="420" y="210">扩展 → S盒 → P盒</text>
+<rect class="dg-box-a" x="360" y="246" width="120" height="36" rx="8"/><text class="dg-tb" x="420" y="256">轮密钥 Kᵢ</text><text class="dg-ts" x="420" y="273">48 位</text>
+</g>
+<g data-step="1" data-flow="1"><path class="dg-line-p" d="M420,246 V226" marker-end="url(#md2p)"/></g>
+<g data-step="2" data-flow="1">
+<path class="dg-line" d="M220,96 H504" marker-end="url(#md2)"/>
+<path class="dg-line-p" d="M480,200 H520 V112" marker-end="url(#md2p)"/>
+</g>
+<g class="dg-pop" data-step="2">
+<circle class="dg-xor" cx="520" cy="96" r="16"/><text class="dg-op" x="520" y="96">⊕</text>
+</g>
+<g data-step="3" data-flow="1">
+<path class="dg-line-p" d="M536,96 H616" marker-end="url(#md2p)"/>
+<path class="dg-line" d="M175,220 V300 H665 V224" marker-end="url(#md2)"/>
+</g>
+<g class="dg-pop" data-step="3">
+<rect class="dg-box-p" x="620" y="76" width="90" height="40" rx="8"/><text class="dg-tb" x="665" y="88">Rᵢ</text><text class="dg-ts" x="665" y="106">32 位</text>
+<rect class="dg-box-p" x="620" y="180" width="90" height="40" rx="8"/><text class="dg-tb" x="665" y="192">Lᵢ</text><text class="dg-ts" x="665" y="210">32 位</text>
+<text class="dg-ts" x="720" y="90" text-anchor="start">Rᵢ = Lᵢ₋₁ ⊕ F</text>
+<text class="dg-ts" x="720" y="194" text-anchor="start">Lᵢ = Rᵢ₋₁</text>
+<text class="dg-ts" x="720" y="210" text-anchor="start">（右半直接搬过来）</text>
+</g>
+<g class="dg-pop" data-step="4">
+<rect class="dg-box-a" x="130" y="316" width="580" height="44" rx="9"/><text class="dg-t" x="420" y="338">解密时结构完全不变，只需把轮密钥倒序使用：(A ⊕ B) ⊕ B = A</text>
+</g>
+</svg>
+<figcaption>图 2：Feistel 网络的单轮结构。右半 Rᵢ₋₁ 与轮密钥 Kᵢ 过 F 函数，结果与左半 Lᵢ₋₁ 异或成为新的右半；右半则原封不动搬过来成为新的左半。因为 F 函数不需要可逆，设计难度大大降低。点上面的「播放」可以看数据是怎么流动的。</figcaption>
+</figure>
+
 ### F 函数里面做了什么？
 
 F 函数是 DES 里唯一"非线性"的部分，它的复杂度决定了整个算法的安全强度。F 函数内部分四步：
@@ -52,9 +160,106 @@ F 函数是 DES 里唯一"非线性"的部分，它的复杂度决定了整个�
 3. **S-Box 替换**：把 48 位分成 8 组，每组 6 位，送进 8 个不同的替换盒（S-Box）。每个 S-Box 把 6 位映射为 4 位，8 个盒子合起来把 48 位压缩成 32 位。这 8 个 S-Box 是 DES 的心脏，也是当年 NSA 被人怀疑埋后门的地方——幸运的是，后来差分密码分析的研究表明，NSA 选的 S-Box 值恰好比随机选择更能抵抗差分攻击，说明他们早就知道这个攻击方法了
 4. **P-Box 置换**：把第 3 步输出的 32 位重新排列一下
 
+这四步连起来的位宽变化值得留意——32 位进、32 位出，中间却被撑到 48 位：
+
+<figure class="dg-figure" data-interval="2200" data-steps='[{"t":"输入：右半 R（32 位）","d":"F 函数只接收上一轮的右半，32 位。左半不进 F 函数，它只在最后参与一次异或。"},{"t":"扩展置换 E","d":"32 位扩展成 48 位，办法是把其中 16 个位复制一遍。看着浪费，其实是为了让每个 S-Box 都能同时影响多个输出位。"},{"t":"与轮密钥异或","d":"48 位扩展结果和 48 位轮密钥 Kᵢ 逐位异或——这是整个 F 函数里唯一的密钥混合步骤。"},{"t":"S-Box 替换","d":"48 位分成 8 组每组 6 位，送进 8 个不同的 S-Box 并行替换，每个盒子 6 位进、4 位出，合起来压缩回 32 位。这是 DES 唯一的非线性部件，也是当年 NSA 被怀疑埋后门的地方。"},{"t":"P-Box 置换","d":"把 32 位按固定表重新排列，让每个 S-Box 的输出扩散到下一轮多个 S-Box 的输入上去。"},{"t":"输出：32 位","d":"F 函数的输出与左半异或，本轮结束。注意 F 函数本身不可逆（S-Box 是 6 进 4 出的压缩），但 Feistel 结构并不需要它可逆。"}]'>
+<svg viewBox="0 0 840 320" role="img" aria-label="DES 的 F 函数内部四步：扩展置换、密钥异或、S-Box 替换、P-Box 置换" text-anchor="middle" dominant-baseline="central">
+<defs><marker id="md3" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path d="M0,0 L10,5 L0,10 Z" fill="currentColor" fill-opacity=".55"/></marker><marker id="md3p" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path d="M0,0 L10,5 L0,10 Z" style="fill:var(--color-primary);fill-opacity:.85"/></marker></defs>
+<text class="dg-tl" x="35" y="60" text-anchor="start">F 函数内部：32 位进，32 位出</text>
+<g class="dg-pop" data-step="0">
+<rect class="dg-box-p" x="35" y="100" width="110" height="56" rx="8"/><text class="dg-tb" x="90" y="118">输入 Rᵢ₋₁</text><text class="dg-ts" x="90" y="138">32 位</text>
+</g>
+<g data-step="1" data-flow="1"><path class="dg-line" d="M149,128 H163" marker-end="url(#md3)"/></g>
+<g class="dg-pop" data-step="1">
+<rect class="dg-box" x="167" y="100" width="110" height="56" rx="8"/><text class="dg-tb" x="222" y="118">扩展置换 E</text><text class="dg-ts" x="222" y="138">32 → 48 位</text>
+</g>
+<g data-step="2" data-flow="1"><path class="dg-line" d="M281,128 H295" marker-end="url(#md3)"/></g>
+<g class="dg-pop" data-step="2">
+<rect class="dg-box-a" x="299" y="100" width="110" height="56" rx="8"/><text class="dg-tb" x="354" y="118">⊕ 轮密钥 Kᵢ</text><text class="dg-ts" x="354" y="138">48 → 48 位</text>
+</g>
+<g data-step="3" data-flow="1"><path class="dg-line" d="M413,128 H427" marker-end="url(#md3)"/></g>
+<g class="dg-pop" data-step="3">
+<rect class="dg-box" x="431" y="100" width="110" height="56" rx="8"/><text class="dg-tb" x="486" y="118">S-Box 替换</text><text class="dg-ts" x="486" y="138">48 → 32 位</text>
+<path class="dg-dash" d="M486,158 V186"/>
+<rect class="dg-cell" x="360" y="196" width="28" height="32" rx="3"/><text class="dg-ts" x="374" y="212">S1</text>
+<rect class="dg-cell" x="392" y="196" width="28" height="32" rx="3"/><text class="dg-ts" x="406" y="212">S2</text>
+<rect class="dg-cell" x="424" y="196" width="28" height="32" rx="3"/><text class="dg-ts" x="438" y="212">S3</text>
+<rect class="dg-cell" x="456" y="196" width="28" height="32" rx="3"/><text class="dg-ts" x="470" y="212">S4</text>
+<rect class="dg-cell" x="488" y="196" width="28" height="32" rx="3"/><text class="dg-ts" x="502" y="212">S5</text>
+<rect class="dg-cell" x="520" y="196" width="28" height="32" rx="3"/><text class="dg-ts" x="534" y="212">S6</text>
+<rect class="dg-cell" x="552" y="196" width="28" height="32" rx="3"/><text class="dg-ts" x="566" y="212">S7</text>
+<rect class="dg-cell" x="584" y="196" width="28" height="32" rx="3"/><text class="dg-ts" x="598" y="212">S8</text>
+<text class="dg-ts" x="486" y="252">8 个 S-Box 并行：每个 6 位进、4 位出</text>
+<text class="dg-ts" x="420" y="278">S-Box 是 DES 唯一的非线性部件，也是当年 NSA 被怀疑埋后门的地方</text>
+</g>
+<g data-step="4" data-flow="1"><path class="dg-line" d="M545,128 H559" marker-end="url(#md3)"/></g>
+<g class="dg-pop" data-step="4">
+<rect class="dg-box" x="563" y="100" width="110" height="56" rx="8"/><text class="dg-tb" x="618" y="118">P-Box 置换</text><text class="dg-ts" x="618" y="138">32 → 32 位</text>
+</g>
+<g data-step="5" data-flow="1"><path class="dg-line" d="M677,128 H691" marker-end="url(#md3)"/></g>
+<g class="dg-pop" data-step="5">
+<rect class="dg-box-p" x="695" y="100" width="110" height="56" rx="8"/><text class="dg-tb" x="750" y="118">F 函数输出</text><text class="dg-ts" x="750" y="138">32 位</text>
+</g>
+</svg>
+<figcaption>图 3：F 函数的四个步骤。32 位输入先扩展成 48 位与轮密钥异或，再经 8 个 S-Box 并行压缩回 32 位（每个盒子 6 位进、4 位出），最后做 P-Box 置换。点上面的「播放」可以看位宽是怎么一路变化的。</figcaption>
+</figure>
+
 ### 密钥编排
 
 DES 输入的"钥匙"名义上是 64 位，但每 8 位的最后一位是奇偶校验位，实际用到的密钥只有 56 位。56 位通过一个固定的置换表生成 16 把各 48 位的轮密钥，每轮用一把。
+
+<figure class="dg-figure" data-interval="2100" data-steps='[{"t":"输入 64 位密钥","d":"DES 的密钥名义上是 64 位，但每 8 位里有 1 位是奇偶校验位——1970 年代数据传输不可靠的产物。"},{"t":"去掉校验位","d":"8 个校验位被丢掉，真正有效的密钥长度只剩 56 位。这 56 位决定了 DES 的全部安全性。"},{"t":"置换选择 PC-1","d":"56 位按固定表重排，然后切成 C₀ 和 D₀ 两半，各 28 位。"},{"t":"每轮循环左移","d":"每一轮把 C 和 D 各自循环左移 1 或 2 位（第 1、2、9、16 轮移 1 位，其余移 2 位），移位的累计结果保证 16 轮用到的位各不相同。"},{"t":"置换选择 PC-2","d":"从移位后的 56 位里挑出 48 位（丢弃 8 位），做一次重排，就得到本轮的 48 位轮密钥 Kᵢ。"},{"t":"生成 16 把轮密钥","d":"重复 16 次得到 K₁ 到 K₁₆。解密时完全不用重算，只要把这 16 把倒序使用即可。"}]'>
+<svg viewBox="0 0 840 360" role="img" aria-label="DES 密钥编排：64 位主密钥派生 16 把 48 位轮密钥" text-anchor="middle" dominant-baseline="central">
+<defs><marker id="md4" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path d="M0,0 L10,5 L0,10 Z" fill="currentColor" fill-opacity=".55"/></marker><marker id="md4p" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path d="M0,0 L10,5 L0,10 Z" style="fill:var(--color-primary);fill-opacity:.85"/></marker></defs>
+<text class="dg-tl" x="40" y="56" text-anchor="start">DES 密钥编排：64 位主密钥 → 16 把 48 位轮密钥</text>
+<g class="dg-pop" data-step="0">
+<rect class="dg-box-a" x="40" y="90" width="120" height="56" rx="8"/><text class="dg-tb" x="100" y="110">DES 密钥</text><text class="dg-ts" x="100" y="130">64 位</text>
+<text class="dg-ts" x="100" y="168">每 8 位中 1 位是校验位</text>
+</g>
+<g data-step="1" data-flow="1"><path class="dg-line" d="M164,118 H192" marker-end="url(#md4)"/></g>
+<g class="dg-pop" data-step="1">
+<rect class="dg-box" x="196" y="90" width="120" height="56" rx="8"/><text class="dg-tb" x="256" y="110">去校验位</text><text class="dg-ts" x="256" y="130">56 位</text>
+<text class="dg-ts" x="256" y="168">去掉 8 位奇偶校验</text>
+</g>
+<g data-step="2" data-flow="1"><path class="dg-line" d="M320,118 H348" marker-end="url(#md4)"/></g>
+<g class="dg-pop" data-step="2">
+<rect class="dg-box" x="352" y="90" width="120" height="56" rx="8"/><text class="dg-tb" x="412" y="110">置换 PC-1</text><text class="dg-ts" x="412" y="130">分成 C₀ D₀</text>
+<text class="dg-ts" x="412" y="168">C₀ / D₀ 各 28 位</text>
+</g>
+<g data-step="3" data-flow="1"><path class="dg-line" d="M476,118 H504" marker-end="url(#md4)"/></g>
+<g class="dg-pop" data-step="3">
+<rect class="dg-box" x="508" y="90" width="120" height="56" rx="8"/><text class="dg-tb" x="568" y="110">循环左移</text><text class="dg-ts" x="568" y="130">每轮 1~2 位</text>
+<text class="dg-ts" x="568" y="168">第 1、2、9、16 轮移 1 位，其余移 2 位</text>
+</g>
+<g data-step="4" data-flow="1"><path class="dg-line" d="M632,118 H660" marker-end="url(#md4)"/></g>
+<g class="dg-pop" data-step="4">
+<rect class="dg-box" x="664" y="90" width="120" height="56" rx="8"/><text class="dg-tb" x="724" y="110">置换 PC-2</text><text class="dg-ts" x="724" y="130">48 位</text>
+<text class="dg-ts" x="724" y="168">从 56 位里挑 48 位</text>
+</g>
+<g data-step="5" data-flow="1"><path class="dg-dash" d="M724,146 V182 H420 V206" marker-end="url(#md4)"/></g>
+<g class="dg-pop" data-step="5">
+<rect class="dg-box-a" x="118" y="210" width="34" height="36" rx="4"/><text class="dg-ts" x="135" y="228">K₁</text>
+<rect class="dg-box-a" x="156" y="210" width="34" height="36" rx="4"/><text class="dg-ts" x="173" y="228">K₂</text>
+<rect class="dg-box-a" x="194" y="210" width="34" height="36" rx="4"/><text class="dg-ts" x="211" y="228">K₃</text>
+<rect class="dg-box-a" x="232" y="210" width="34" height="36" rx="4"/><text class="dg-ts" x="249" y="228">K₄</text>
+<rect class="dg-box-a" x="270" y="210" width="34" height="36" rx="4"/><text class="dg-ts" x="287" y="228">K₅</text>
+<rect class="dg-box-a" x="308" y="210" width="34" height="36" rx="4"/><text class="dg-ts" x="325" y="228">K₆</text>
+<rect class="dg-box-a" x="346" y="210" width="34" height="36" rx="4"/><text class="dg-ts" x="363" y="228">K₇</text>
+<rect class="dg-box-a" x="384" y="210" width="34" height="36" rx="4"/><text class="dg-ts" x="401" y="228">K₈</text>
+<rect class="dg-box-a" x="422" y="210" width="34" height="36" rx="4"/><text class="dg-ts" x="439" y="228">K₉</text>
+<rect class="dg-box-a" x="460" y="210" width="34" height="36" rx="4"/><text class="dg-ts" x="477" y="228">K₁₀</text>
+<rect class="dg-box-a" x="498" y="210" width="34" height="36" rx="4"/><text class="dg-ts" x="515" y="228">K₁₁</text>
+<rect class="dg-box-a" x="536" y="210" width="34" height="36" rx="4"/><text class="dg-ts" x="553" y="228">K₁₂</text>
+<rect class="dg-box-a" x="574" y="210" width="34" height="36" rx="4"/><text class="dg-ts" x="591" y="228">K₁₃</text>
+<rect class="dg-box-a" x="612" y="210" width="34" height="36" rx="4"/><text class="dg-ts" x="629" y="228">K₁₄</text>
+<rect class="dg-box-a" x="650" y="210" width="34" height="36" rx="4"/><text class="dg-ts" x="667" y="228">K₁₅</text>
+<rect class="dg-box-a" x="688" y="210" width="34" height="36" rx="4"/><text class="dg-ts" x="705" y="228">K₁₆</text>
+<text class="dg-ts" x="420" y="268">生成 16 把各 48 位轮密钥，每轮用一把</text>
+<rect class="dg-box-a" x="170" y="284" width="500" height="44" rx="9"/><text class="dg-t" x="420" y="306">解密：结构完全不变，只需把 16 把轮密钥倒序使用</text>
+</g>
+</svg>
+<figcaption>图 4：DES 的密钥编排。64 位密钥去掉 8 位校验后剩 56 位，经 PC-1 置换切成两半，每轮各自循环左移再用 PC-2 挑出 48 位，如此重复 16 次得到 16 把轮密钥。点上面的「播放」可以看轮密钥是怎么被一把把派生出来的。</figcaption>
+</figure>
 
 打个比方：如果把 DES 比作一个搅拌机，Feistel 网络就是搅拌桶，F 函数是搅拌叶，S-Box 是不规则形状的刀片，轮密钥是每次加进去的调料。一轮搅拌完，食材已经面目全非，16 轮之后谁也认不出这堆东西原本是什么了。
 
