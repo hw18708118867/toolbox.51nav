@@ -6,6 +6,7 @@ description: "从数学直觉理解 RSA 非对称加密的核心原理：为什�
 keywords: [RSA加密, 非对称加密, 公钥私钥, 大数分解, 欧拉定理, HTTPS, RSA签名, 加密原理]
 author: 开发工具箱
 date: 2026-06-15
+updated: 2026-08-31
 phase: 1
 relatedTools: [aes, des, rsa-keygen]
 relatedTutorials: [aes, des, rsa-keygen]
@@ -33,6 +34,52 @@ RSA 这个名字取自三位发明者的姓氏首字母：Ron Rivest、Adi Shami
 p = 3, q = 11
 ```
 
+下面这五步就是上面这行数学生成密钥的全过程，点「播放」可以一步步看：
+
+<figure class="dg-figure" data-interval="2100" data-steps='[{"t":"选两个素数 p、q","d":"随机挑选两个大素数。实际使用中它们各约 1024 位；这里为了能手算，取 p=3、q=11。"},{"t":"算模数 n","d":"n = p × q = 33。这个 n 会同时出现在公钥和私钥里，是可以公开的。"},{"t":"算欧拉函数 φ(n)","d":"φ(n) = (p-1)(q-1) = 20，含义是 1 到 32 中与 33 互质的数有 20 个。这个值必须严格保密——泄露它就等于泄露私钥。"},{"t":"选公钥指数 e","d":"e 要满足 1 < e < φ(n) 且与 φ(n) 互质，这里取 e=3。实际通用的取值是 65537。"},{"t":"算私钥指数 d","d":"d 是 e 关于模 φ(n) 的乘法逆元，即 e × d ≡ 1 (mod φ(n))。3 × 7 = 21 ≡ 1 (mod 20)，所以 d=7。"},{"t":"得到密钥对","d":"公钥是 (n, e) = (33, 3)，可以公开发布；私钥是 (n, d) = (33, 7)，必须死守。两者共用同一个模数 n。"}]'>
+<svg viewBox="0 0 840 510" role="img" aria-label="RSA 密钥生成流程：从两个素数到公钥私钥" text-anchor="middle" dominant-baseline="central">
+<defs><marker id="mr1" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path d="M0,0 L10,5 L0,10 Z" fill="currentColor" fill-opacity=".55"/></marker><marker id="mr1p" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path d="M0,0 L10,5 L0,10 Z" style="fill:var(--color-primary);fill-opacity:.85"/></marker></defs>
+<g class="dg-pop" data-step="0">
+<rect class="dg-box-p" x="300" y="40" width="80" height="40" rx="8"/><text class="dg-tb" x="340" y="60">p = 3</text>
+<rect class="dg-box-p" x="460" y="40" width="80" height="40" rx="8"/><text class="dg-tb" x="500" y="60">q = 11</text>
+<text class="dg-ts" x="560" y="60" text-anchor="start">随机挑选的两个素数（实际各 1024 位）</text>
+</g>
+<g data-step="1" data-flow="1">
+<path class="dg-dash" d="M340,80 V96 H500"/>
+<path class="dg-line-p" d="M420,96 V108" marker-end="url(#mr1p)"/>
+</g>
+<g class="dg-pop" data-step="1">
+<rect class="dg-box" x="320" y="112" width="200" height="44" rx="9"/><text class="dg-tb" x="420" y="126">n = p × q = 33</text><text class="dg-ts" x="420" y="146">公钥和私钥共用的模数</text>
+<text class="dg-ts" x="540" y="134" text-anchor="start">这个可以公开</text>
+</g>
+<g data-step="2" data-flow="1"><path class="dg-line-p" d="M420,156 V172" marker-end="url(#mr1p)"/></g>
+<g class="dg-pop" data-step="2">
+<rect class="dg-box-a" x="320" y="176" width="200" height="44" rx="9"/><text class="dg-tb" x="420" y="190">φ(n) = (p-1)(q-1) = 20</text><text class="dg-ts" x="420" y="210">1 到 32 中与 33 互质的数的个数</text>
+<text class="dg-ts" x="540" y="198" text-anchor="start">⚠ 必须严格保密</text>
+</g>
+<g data-step="3" data-flow="1"><path class="dg-line-p" d="M420,220 V252" marker-end="url(#mr1p)"/></g>
+<g class="dg-pop" data-step="3">
+<rect class="dg-box" x="320" y="256" width="200" height="44" rx="9"/><text class="dg-tb" x="420" y="270">e = 3</text><text class="dg-ts" x="420" y="290">1 &lt; e &lt; φ(n) 且与 φ(n) 互质</text>
+<text class="dg-ts" x="540" y="278" text-anchor="start">实际通用取值 65537</text>
+</g>
+<g data-step="4" data-flow="1"><path class="dg-line-p" d="M420,300 V332" marker-end="url(#mr1p)"/></g>
+<g class="dg-pop" data-step="4">
+<rect class="dg-box" x="320" y="336" width="200" height="44" rx="9"/><text class="dg-tb" x="420" y="350">d = 7</text><text class="dg-ts" x="420" y="370">e × d ≡ 1 (mod φ(n))</text>
+<text class="dg-ts" x="540" y="358" text-anchor="start">3 × 7 = 21 ≡ 1 (mod 20)</text>
+</g>
+<g data-step="5" data-flow="1">
+<path class="dg-line-p" d="M420,380 V408 H265 V432" marker-end="url(#mr1p)"/>
+<path class="dg-line-p" d="M420,380 V408 H575 V432" marker-end="url(#mr1p)"/>
+</g>
+<g class="dg-pop" data-step="5">
+<rect class="dg-box-p" x="170" y="436" width="190" height="48" rx="9"/><text class="dg-tb" x="265" y="452">公钥 (n=33, e=3)</text><text class="dg-ts" x="265" y="472">可以公开发布</text>
+<rect class="dg-box-a" x="480" y="436" width="190" height="48" rx="9"/><text class="dg-tb" x="575" y="452">私钥 (n=33, d=7)</text><text class="dg-ts" x="575" y="472">必须严格保密</text>
+</g>
+<text class="dg-ts" x="24" y="500" text-anchor="start">实际使用中 p、q 各约 1024 位，n 是 2048 位的大整数</text>
+</svg>
+<figcaption>图 1：RSA 密钥生成。两个素数相乘得到模数 n，由 n 推出欧拉函数 φ(n)（必须保密），再选公钥指数 e 并求出它的模逆元 d。公钥 (n, e) 公开，私钥 (n, d) 保密。点上面的「播放」可以看每一步。</figcaption>
+</figure>
+
 **第一步：算 n。** n = p × q = 3 × 11 = 33。这个 33 会成为公钥和私钥的公共部分。
 
 **第二步：算 φ(n)。** 这是欧拉函数值，对于两个素数的乘积，φ(n) = (p-1) × (q-1) = 2 × 10 = 20。它的含义是：1 到 33 之间有多少个数和 33 互质。这个 20 不能公开。
@@ -50,11 +97,109 @@ p = 3, q = 11
 
 17^7 手动算有点大，但你可以拿工具验证：17^7 = 410338673，410338673 / 33 的余数等于 8。解密成功！
 
+把上面这串计算画成图，就是一次完整的 RSA 加解密：
+
+<figure class="dg-figure" data-interval="2200" data-steps='[{"t":"生成密钥对","d":"接收方先算出公钥 (33, 3) 和私钥 (33, 7)，把公钥发给发送方，私钥自己留着。"},{"t":"准备明文","d":"要加密的消息 m = 8。RSA 要求明文必须小于模数 n，这里 8 < 33，满足条件。"},{"t":"用公钥加密","d":"发送方执行 c = m^e mod n，也就是 8^3 mod 33 = 17。这一步任何人都能做，因为公钥是公开的。"},{"t":"密文传输","d":"密文 17 在不安全的信道上传输，谁都能截获到这个数字。"},{"t":"用私钥解密","d":"接收方执行 m = c^d mod n，也就是 17^7 mod 33 = 8。这一步只有持有私钥的人能做。"},{"t":"还原出明文","d":"明文 m = 8 被完整还原。整个过程中私钥从未离开过接收方的机器。"},{"t":"窃听者为什么解不开","d":"窃听者手里有 n=33、e=3、c=17，想解出 m 就必须先求 d=7；求 d 需要先知道 φ(n)=20；而求 φ(n) 必须把 33 分解成 3×11。这就是大数分解难题。"}]'>
+<svg viewBox="0 0 840 480" role="img" aria-label="RSA 加解密完整流程：公钥加密私钥解密" text-anchor="middle" dominant-baseline="central">
+<defs><marker id="mr2" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path d="M0,0 L10,5 L0,10 Z" fill="currentColor" fill-opacity=".55"/></marker><marker id="mr2p" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path d="M0,0 L10,5 L0,10 Z" style="fill:var(--color-primary);fill-opacity:.85"/></marker><marker id="mr2a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path d="M0,0 L10,5 L0,10 Z" style="fill:var(--color-accent);fill-opacity:.85"/></marker></defs>
+<g class="dg-pop" data-step="0">
+<rect class="dg-box-a" x="220" y="24" width="400" height="44" rx="9"/><text class="dg-tb" x="420" y="40">接收方生成密钥对</text><text class="dg-ts" x="420" y="58">公钥 (n=33, e=3) 公开　私钥 (n=33, d=7) 自留</text>
+</g>
+<g data-step="1" data-flow="1"><path class="dg-line-p" d="M420,68 V84" marker-end="url(#mr2p)"/></g>
+<g class="dg-pop" data-step="1">
+<rect class="dg-box-p" x="320" y="88" width="200" height="40" rx="8"/><text class="dg-tb" x="420" y="108">明文 m = 8</text>
+<text class="dg-ts" x="540" y="108" text-anchor="start">要求 m &lt; n（本例 8 &lt; 33）</text>
+</g>
+<g data-step="2" data-flow="1"><path class="dg-line-p" d="M420,128 V144" marker-end="url(#mr2p)"/></g>
+<g class="dg-pop" data-step="2">
+<rect class="dg-box" x="320" y="148" width="200" height="48" rx="9"/><text class="dg-tb" x="420" y="166">加密 c = m^e mod n</text><text class="dg-ts" x="420" y="186">c = 8^3 mod 33 = 17</text>
+</g>
+<g class="dg-pop" data-step="2">
+<rect class="dg-box-p" x="580" y="148" width="170" height="48" rx="8"/><text class="dg-tb" x="665" y="166">公钥 (n=33, e=3)</text><text class="dg-ts" x="665" y="186">公开给全世界</text>
+</g>
+<g data-step="2" data-flow="1"><path class="dg-line-p" d="M576,172 H524" marker-end="url(#mr2p)"/></g>
+<g data-step="3" data-flow="1">
+<path class="dg-line-a" d="M420,196 V212" marker-end="url(#mr2a)"/>
+<path class="dg-dash" d="M470,236 H700 V404" marker-end="url(#mr2)"/>
+</g>
+<g class="dg-pop" data-step="3">
+<rect class="dg-box-a" x="320" y="216" width="200" height="40" rx="8"/><text class="dg-tb" x="420" y="236">密文 c = 17</text>
+<text class="dg-ts" x="100" y="236" text-anchor="end">在不安全信道上传输</text>
+</g>
+<g data-step="4" data-flow="1"><path class="dg-line-p" d="M420,256 V272" marker-end="url(#mr2p)"/></g>
+<g class="dg-pop" data-step="4">
+<rect class="dg-box" x="320" y="276" width="200" height="48" rx="9"/><text class="dg-tb" x="420" y="294">解密 m = c^d mod n</text><text class="dg-ts" x="420" y="314">m = 17^7 mod 33 = 8</text>
+</g>
+<g class="dg-pop" data-step="4">
+<rect class="dg-box-a" x="580" y="276" width="170" height="48" rx="8"/><text class="dg-tb" x="665" y="294">私钥 (n=33, d=7)</text><text class="dg-ts" x="665" y="314">只有接收方持有</text>
+</g>
+<g data-step="4" data-flow="1"><path class="dg-line-p" d="M576,300 H524" marker-end="url(#mr2p)"/></g>
+<g data-step="5" data-flow="1"><path class="dg-line-p" d="M420,324 V340" marker-end="url(#mr2p)"/></g>
+<g class="dg-pop" data-step="5">
+<rect class="dg-box-g" x="320" y="344" width="200" height="40" rx="8"/><text class="dg-tb" x="420" y="364">明文 m = 8（还原成功）</text>
+</g>
+<g class="dg-pop" data-step="6">
+<rect class="dg-box-w" x="120" y="404" width="600" height="52" rx="9"/>
+<text class="dg-t" x="420" y="422">窃听者知道 n=33、e=3、c=17，但要求出 d 必先分解 n = 3 × 11</text>
+<text class="dg-ts" x="420" y="442">n 若是 2048 位，分解它需要的时间比宇宙年龄还长</text>
+</g>
+</svg>
+<figcaption>图 2：RSA 的一次完整加解密。发送方用公开的公钥做加密，密文即使被截获也无妨，只有持有私钥的接收方能还原。点上面的「播放」可以看数据是怎么变化的。</figcaption>
+</figure>
+
 ### 为什么别人破解不了？
 
 你公开发布了 n=33 和 e=3。攻击者想要算出 d=7，唯一的办法是先算出 φ(n) = 20。要算 φ(n) 就得知道 p 和 q——而要知道 p 和 q，就必须把 33 分解成 3 × 11。
 
 33 当然一秒钟就分解了。但如果 p 和 q 是两颗各 300 多位的素数呢？它们的乘积 n 是一个 600 多位的大整数。以目前已知最好的分解算法（数域筛法）和全球算力总和，分解一个 2048 位的 RSA 模数需要的时间比宇宙年龄还长。这就是 RSA 安全性的全部底气。
+
+这个"单向性"是整个 RSA 的地基，值得单独画一张图：
+
+<figure class="dg-figure" data-interval="2300" data-steps='[{"t":"两个大素数","d":"随机挑选两个各约 1024 位的素数 p 和 q。它们是私钥的核心秘密。"},{"t":"正向：相乘很容易","d":"p × q = n 只是一次大数乘法，计算机毫秒级就能算完。乘法在正向永远都是容易的。"},{"t":"逆向：分解极难","d":"从 n 反推 p 和 q 没有任何捷径。已知最好的数域筛法，配上全球算力，分解 2048 位 n 也要数万亿年。"},{"t":"攻击者的死路","d":"攻击者手里只有公钥 (n, e)。想求私钥 d 就得先求 φ(n)，求 φ(n) 就得先分解 n——每一步都是死胡同。"},{"t":"安全性只靠这一条","d":"RSA 的安全性不来自任何巧妙隐藏，而完全建立在「大数分解在计算上不可行」这一条假设上。算法完全公开，别人就是解不开。"}]'>
+<svg viewBox="0 0 840 440" role="img" aria-label="RSA 单向性：大数相乘容易、分解极难" text-anchor="middle" dominant-baseline="central">
+<defs><marker id="mr3" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path d="M0,0 L10,5 L0,10 Z" fill="currentColor" fill-opacity=".55"/></marker><marker id="mr3p" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path d="M0,0 L10,5 L0,10 Z" style="fill:var(--color-primary);fill-opacity:.85"/></marker></defs>
+<g class="dg-pop" data-step="0">
+<rect class="dg-box-p" x="290" y="40" width="110" height="44" rx="8"/><text class="dg-tb" x="345" y="54">p</text><text class="dg-ts" x="345" y="72">1024 位大素数</text>
+<rect class="dg-box-p" x="440" y="40" width="110" height="44" rx="8"/><text class="dg-tb" x="495" y="54">q</text><text class="dg-ts" x="495" y="72">1024 位大素数</text>
+</g>
+<g data-step="1" data-flow="1">
+<path class="dg-dash" d="M345,84 V100 H495"/>
+<path class="dg-line-p" d="M420,100 V112" marker-end="url(#mr3p)"/>
+</g>
+<g class="dg-pop" data-step="1">
+<rect class="dg-box" x="290" y="116" width="260" height="52" rx="9"/><text class="dg-tb" x="420" y="132">n = p × q（2048 位）</text><text class="dg-ts" x="420" y="154">相乘：毫秒级，计算机最擅长的事</text>
+<text class="dg-ts" x="570" y="142" text-anchor="start">✓ 容易，这就是 RSA 的正向</text>
+</g>
+<g data-step="2" data-flow="1"><path class="dg-dash" d="M420,168 V184" marker-end="url(#mr3)"/></g>
+<g class="dg-pop" data-step="2">
+<rect class="dg-box-w" x="290" y="188" width="110" height="44" rx="8"/><text class="dg-tb" x="345" y="210">p = ?</text>
+<rect class="dg-box-w" x="440" y="188" width="110" height="44" rx="8"/><text class="dg-tb" x="495" y="210">q = ?</text>
+<text class="dg-ts" x="570" y="202" text-anchor="start">✗ 极难：数域筛法 + 全球算力</text>
+<text class="dg-ts" x="570" y="218" text-anchor="start">也要数万亿年</text>
+</g>
+<g data-step="3" data-flow="1">
+<path class="dg-dash" d="M420,232 V262" marker-end="url(#mr3)"/>
+<path class="dg-line" d="M170,294 H197" marker-end="url(#mr3)"/>
+<path class="dg-line" d="M325,294 H352" marker-end="url(#mr3)"/>
+<path class="dg-line" d="M480,294 H507" marker-end="url(#mr3)"/>
+<path class="dg-line" d="M635,294 H662" marker-end="url(#mr3)"/>
+</g>
+<g class="dg-pop" data-step="3">
+<rect class="dg-box" x="50" y="270" width="120" height="48" rx="8"/><text class="dg-tb" x="110" y="288">攻击者已知</text><text class="dg-ts" x="110" y="306">公钥 (n, e)</text>
+<rect class="dg-box" x="205" y="270" width="120" height="48" rx="8"/><text class="dg-tb" x="265" y="288">想求</text><text class="dg-ts" x="265" y="306">私钥 d</text>
+<rect class="dg-box" x="360" y="270" width="120" height="48" rx="8"/><text class="dg-tb" x="420" y="288">需先求</text><text class="dg-ts" x="420" y="306">φ(n)</text>
+<rect class="dg-box" x="515" y="270" width="120" height="48" rx="8"/><text class="dg-tb" x="575" y="288">需先分解</text><text class="dg-ts" x="575" y="306">n → p, q</text>
+<rect class="dg-box-w" x="670" y="270" width="120" height="48" rx="8"/><text class="dg-tb" x="730" y="288">结论</text><text class="dg-ts" x="730" y="306">走不通</text>
+</g>
+<g class="dg-pop" data-step="4">
+<rect class="dg-box-g" x="50" y="344" width="740" height="52" rx="9"/>
+<text class="dg-t" x="420" y="362">RSA 的全部安全性，就建立在「大数分解在计算上不可行」这一条假设上</text>
+<text class="dg-ts" x="420" y="382">算法完全公开，攻击者知道你在用什么数学，就是解不开</text>
+<text class="dg-ts" x="420" y="416">768 位：2009 年被分解　1024 位：已不建议使用　2048 位：目前安全</text>
+</g>
+</svg>
+<figcaption>图 3：RSA 依赖的单向性。两个大素数相乘只要毫秒，反过来把乘积分解回素数却要数万亿年——这个不对称就是全部安全性的来源。点上面的「播放」可以看攻击者为什么走投无路。</figcaption>
+</figure>
 
 说白了，RSA 的安全性不来自任何"巧妙隐藏"，而完全建立在"大数分解在计算上不可行"这一条假设上。这很反直觉——一个外人完全知道你在用什么数学做加密，他就是解不开。这也是密码学和日常"秘密"最大的区别。
 
@@ -65,6 +210,43 @@ p = 3, q = 11
 加密是 m^e mod n，解密是再对密文做 d 次幂：(m^e)^d = m^(ed) = m^(kφ(n) + 1) = (m^φ(n))^k × m ≡ 1^k × m ≡ m (mod n)。严谨的证明要处理 m 和 n 不互质的情况，但借助中国剩余定理可以证明那个场景下照样成立。
 
 说实话，我第一次看到这个证明的时候也感觉像变魔术——明明是做了模指数运算，绕了一圈又回到了原点。但把 e 和 d 代入那个等式中一步步化简之后，就觉得这设计真的特别干净。
+
+上面那段推导拆成一步步，是这样走的：
+
+<figure class="dg-figure" data-interval="2400" data-steps='[{"t":"加密：c = m^e mod n","d":"把明文 m 做 e 次幂再取模。本例 8^3 mod 33 = 17，明文变成了看起来毫无关系的 17。"},{"t":"解密并合并指数","d":"解密是 c^d，代入 c = m^e 得到 (m^e)^d = m^(e·d)。指数相乘：e·d = 3 × 7 = 21。"},{"t":"关键恒等式","d":"因为 d 是 e 关于模 φ(n) 的逆元，所以 e·d = k·φ(n) + 1。本例 21 = 1 × 20 + 1，即 k=1、φ(n)=20。"},{"t":"把指数拆开","d":"m^(e·d) = m^(k·φ(n)+1) = (m^φ(n))^k × m。本例 8^21 = (8^20)^1 × 8。"},{"t":"欧拉定理登场","d":"欧拉定理说 m^φ(n) ≡ 1 (mod n)（要求 m 与 n 互质）。本例 8^20 ≡ 1 (mod 33)。m 与 n 不互质的情况可用中国剩余定理证明同样成立。"},{"t":"回到原点","d":"(m^φ(n))^k × m ≡ 1^k × m ≡ m (mod n)。本例 1^1 × 8 = 8，明文完好无损地回来了。绕了一大圈，全靠 e 和 d 互为模逆元。"}]'>
+<svg viewBox="0 0 840 472" role="img" aria-label="欧拉定理推导：为什么 RSA 解密能还原明文" text-anchor="middle" dominant-baseline="central">
+<defs><marker id="mr4" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path d="M0,0 L10,5 L0,10 Z" fill="currentColor" fill-opacity=".55"/></marker><marker id="mr4p" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path d="M0,0 L10,5 L0,10 Z" style="fill:var(--color-primary);fill-opacity:.85"/></marker></defs>
+<g class="dg-pop" data-step="0">
+<circle class="dg-xor" cx="200" cy="64" r="14"/><text class="dg-tl" x="200" y="64">1</text>
+<rect class="dg-box-p" x="220" y="40" width="400" height="48" rx="9"/><text class="dg-tb" x="420" y="56">加密 c = m^e mod n</text><text class="dg-ts" x="420" y="76">本例：c = 8^3 mod 33 = 17</text>
+</g>
+<g data-step="1" data-flow="1"><path class="dg-line-p" d="M420,88 V108" marker-end="url(#mr4p)"/></g>
+<g class="dg-pop" data-step="1">
+<circle class="dg-xor" cx="200" cy="136" r="14"/><text class="dg-tl" x="200" y="136">2</text>
+<rect class="dg-box" x="220" y="112" width="400" height="48" rx="9"/><text class="dg-tb" x="420" y="128">解密 c^d = (m^e)^d = m^(e·d) mod n</text><text class="dg-ts" x="420" y="148">指数相乘：e·d = 3 × 7 = 21</text>
+</g>
+<g data-step="2" data-flow="1"><path class="dg-line-p" d="M420,160 V180" marker-end="url(#mr4p)"/></g>
+<g class="dg-pop" data-step="2">
+<circle class="dg-xor" cx="200" cy="208" r="14"/><text class="dg-tl" x="200" y="208">3</text>
+<rect class="dg-box-a" x="220" y="184" width="400" height="48" rx="9"/><text class="dg-tb" x="420" y="200">关键：e·d = k·φ(n) + 1</text><text class="dg-ts" x="420" y="220">21 = 1 × 20 + 1，即 k = 1、φ(n) = 20</text>
+</g>
+<g data-step="3" data-flow="1"><path class="dg-line-p" d="M420,232 V252" marker-end="url(#mr4p)"/></g>
+<g class="dg-pop" data-step="3">
+<circle class="dg-xor" cx="200" cy="280" r="14"/><text class="dg-tl" x="200" y="280">4</text>
+<rect class="dg-box" x="220" y="256" width="400" height="48" rx="9"/><text class="dg-tb" x="420" y="272">m^(e·d) = m^(k·φ(n)+1) = (m^φ(n))^k × m</text><text class="dg-ts" x="420" y="292">本例：8^21 = (8^20)^1 × 8</text>
+</g>
+<g data-step="4" data-flow="1"><path class="dg-line-p" d="M420,304 V324" marker-end="url(#mr4p)"/></g>
+<g class="dg-pop" data-step="4">
+<circle class="dg-xor" cx="200" cy="352" r="14"/><text class="dg-tl" x="200" y="352">5</text>
+<rect class="dg-box-a" x="220" y="328" width="400" height="48" rx="9"/><text class="dg-tb" x="420" y="344">欧拉定理：m^φ(n) ≡ 1 (mod n)</text><text class="dg-ts" x="420" y="364">8^20 ≡ 1 (mod 33)，于是 (1)^1 × 8 = 8</text>
+</g>
+<g data-step="5" data-flow="1"><path class="dg-line-p" d="M420,376 V396" marker-end="url(#mr4p)"/></g>
+<g class="dg-pop" data-step="5">
+<rect class="dg-box-g" x="220" y="400" width="400" height="48" rx="9"/><text class="dg-tb" x="420" y="416">≡ 1^k × m ≡ m (mod n)，明文还原</text><text class="dg-ts" x="420" y="436">绕了一圈回到原点：m = 8 ✓</text>
+</g>
+</svg>
+<figcaption>图 4：RSA 正确性的推导。加密解密合起来是 m^(e·d)，而 e·d = k·φ(n) + 1，拆开后由欧拉定理 m^φ(n) ≡ 1 (mod n) 消掉多余项，明文就回到了原点。点上面的「播放」可以看这个化简过程。</figcaption>
+</figure>
 
 ## 核心特性
 
@@ -123,6 +305,53 @@ RSA 加密和签名是同一对数学操作的两种用法：加密是用公钥�
 ### 误区三：RSA 签名和 RSA 加密是同一回事
 
 操作上看似一样，但语义完全不同。加密是为了机密性，签名是为了认证和不可否认性。更关键的是，现实中不能直接把"私钥加密"当签名用——没有填充的 RSA 签名（教科书式 RSA）极其脆弱，必须用 PSS 或 PKCS#1 v1.5 签名方案。我早年写过一个"签名"功能直接拿裸 RSA 操作拼接，被做安全的朋友一顿批评——那段代码如果上生产环境，攻击者可以轻松伪造签名。
+
+同一对密钥，两个方向，目的完全相反：
+
+<figure class="dg-figure" data-interval="2300" data-steps='[{"t":"同一对密钥","d":"公钥 (n, e) 和私钥 (n, d) 是同一对，数学上 e 和 d 互为模逆元。"},{"t":"加密：公钥加密，私钥解密","d":"任何持有公钥的人都能加密，但只有私钥持有者能解开。密文只给收件人看，目的是保证机密性——不让别人看懂。"},{"t":"签名：私钥签名，公钥验证","d":"只有私钥持有者能签出有效签名，签名值跟着原文一起公开发布，任何持有公钥的人都能验证。目的是认证与不可否认——证明是谁签的。"},{"t":"为什么是相反的两件事","d":"加密解决「别人看不到」，签名解决「赖不掉」。一个求机密性，一个求身份认证，语义完全不同，填充方案也不同（OAEP 用于加密，PSS 用于签名）。"}]'>
+<svg viewBox="0 0 840 472" role="img" aria-label="RSA 加密与签名的方向对比" text-anchor="middle" dominant-baseline="central">
+<defs><marker id="mr5" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path d="M0,0 L10,5 L0,10 Z" fill="currentColor" fill-opacity=".55"/></marker><marker id="mr5p" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path d="M0,0 L10,5 L0,10 Z" style="fill:var(--color-primary);fill-opacity:.85"/></marker><marker id="mr5a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path d="M0,0 L10,5 L0,10 Z" style="fill:var(--color-accent);fill-opacity:.85"/></marker></defs>
+<g class="dg-pop" data-step="0">
+<rect class="dg-box" x="320" y="24" width="200" height="44" rx="9"/><text class="dg-tb" x="420" y="40">RSA 密钥对</text><text class="dg-ts" x="420" y="58">公钥 (n, e) · 私钥 (n, d)</text>
+</g>
+<g data-step="1" data-flow="1">
+<path class="dg-line-p" d="M420,68 V78 H215 V104" marker-end="url(#mr5p)"/>
+<text class="dg-ts" x="300" y="70" text-anchor="start">加密方向</text>
+</g>
+<g data-step="2" data-flow="1">
+<path class="dg-line-a" d="M420,68 V78 H625 V104" marker-end="url(#mr5a)"/>
+<text class="dg-ts" x="460" y="70" text-anchor="start">签名方向</text>
+</g>
+<g class="dg-pop" data-step="1">
+<rect class="dg-box-p" x="145" y="104" width="140" height="38" rx="8"/><text class="dg-tb" x="215" y="123">明文 m</text>
+<rect class="dg-box" x="145" y="162" width="140" height="42" rx="8"/><text class="dg-tb" x="215" y="177">公钥加密</text><text class="dg-ts" x="215" y="195">任何人都能做</text>
+<rect class="dg-box-a" x="145" y="224" width="140" height="38" rx="8"/><text class="dg-tb" x="215" y="243">密文 c</text>
+<rect class="dg-box" x="145" y="282" width="140" height="42" rx="8"/><text class="dg-tb" x="215" y="297">私钥解密</text><text class="dg-ts" x="215" y="315">只有持有者能做</text>
+<rect class="dg-box-g" x="145" y="344" width="140" height="38" rx="8"/><text class="dg-tb" x="215" y="363">还原明文</text>
+<path class="dg-line" d="M215,142 V158" marker-end="url(#mr5)"/>
+<path class="dg-line" d="M215,204 V220" marker-end="url(#mr5)"/>
+<path class="dg-line" d="M215,262 V278" marker-end="url(#mr5)"/>
+<path class="dg-line" d="M215,324 V340" marker-end="url(#mr5)"/>
+</g>
+<g class="dg-pop" data-step="2">
+<rect class="dg-box-p" x="555" y="104" width="140" height="38" rx="8"/><text class="dg-tb" x="625" y="123">消息哈希 h</text>
+<rect class="dg-box" x="555" y="162" width="140" height="42" rx="8"/><text class="dg-tb" x="625" y="177">私钥签名</text><text class="dg-ts" x="625" y="195">只有持有者能做</text>
+<rect class="dg-box-a" x="555" y="224" width="140" height="38" rx="8"/><text class="dg-tb" x="625" y="243">签名值 s</text>
+<rect class="dg-box" x="555" y="282" width="140" height="42" rx="8"/><text class="dg-tb" x="625" y="297">公钥验证</text><text class="dg-ts" x="625" y="315">任何人都能验</text>
+<rect class="dg-box-g" x="555" y="344" width="140" height="38" rx="8"/><text class="dg-tb" x="625" y="363">一致则通过</text>
+<path class="dg-line" d="M625,142 V158" marker-end="url(#mr5)"/>
+<path class="dg-line" d="M625,204 V220" marker-end="url(#mr5)"/>
+<path class="dg-line" d="M625,262 V278" marker-end="url(#mr5)"/>
+<path class="dg-line" d="M625,324 V340" marker-end="url(#mr5)"/>
+</g>
+<g class="dg-pop" data-step="3">
+<rect class="dg-box-a" x="120" y="400" width="600" height="48" rx="9"/>
+<text class="dg-t" x="420" y="416">加密 = 公钥加密、私钥解密 → 保证机密性</text>
+<text class="dg-ts" x="420" y="436">签名 = 私钥签名、公钥验证 → 保证身份认证与不可否认性</text>
+</g>
+</svg>
+<figcaption>图 5：RSA 加密与签名用的是同一对密钥，但方向完全相反。加密是公钥进私钥出，为的是不让别人看懂；签名是私钥进公钥出，为的是证明是谁签的。点上面的「播放」可以看两条路径的差异。</figcaption>
+</figure>
 
 ## RSA vs ECC vs AES
 
