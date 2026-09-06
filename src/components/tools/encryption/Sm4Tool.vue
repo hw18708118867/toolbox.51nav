@@ -40,7 +40,7 @@
       <!-- Tab 1: 解密 -->
       <template #tab-1>
         <div class="space-y-3">
-          <TextInput v-model="decryptInput" label="输入密文" placeholder="请输入要解密的密文" :rows="4" show-count />
+          <TextInput v-model="decryptInput" label="输入密文" placeholder="请输入要解密的密文（支持从 URL 复制的 %2B 这类编码形式）" :rows="4" show-count />
           <div class="grid grid-cols-2 gap-3">
             <div>
               <label class="text-xs font-medium mb-1 block" style="color: var(--color-text-secondary);">密钥 (128-bit Key)</label>
@@ -69,6 +69,7 @@
             </button>
           </div>
           <ErrorAlert :message="decryptError" />
+          <NoticeAlert :message="decryptNotice" />
           <TextOutput v-model="decryptOutput" label="解密结果" :rows="4" />
         </div>
       </template>
@@ -83,6 +84,8 @@ import TextInput from '../../common/TextInput.vue';
 import TextOutput from '../../common/TextOutput.vue';
 import TabView from '../../common/TabView.vue';
 import ErrorAlert from '../../common/ErrorAlert.vue';
+import NoticeAlert from '../../common/NoticeAlert.vue';
+import { normalizeCipherInput, describeCipherNormalization } from '../../../lib/cipher-input';
 
 // ── SM4 Cipher Implementation ──
 // SM4 is a 128-bit block cipher with 128-bit key (Chinese National Standard GM/T 0002-2012)
@@ -269,6 +272,7 @@ const decryptMode = ref('ECB');
 const inputFormat = ref('Base64');
 const decryptOutput = ref('');
 const decryptError = ref('');
+const decryptNotice = ref('');
 
 function keyToWords(keyStr: string): number[] {
   const keyBytes = CryptoJS.enc.Utf8.parse(keyStr);
@@ -316,19 +320,24 @@ function encrypt() {
 function decrypt() {
   decryptError.value = '';
   decryptOutput.value = '';
+  decryptNotice.value = '';
   try {
     if (!decryptInput.value) { decryptError.value = '请输入密文'; return; }
+    const isBase64 = inputFormat.value === 'Base64';
+    const { value: cipherText, notes } = normalizeCipherInput(decryptInput.value, isBase64);
+    decryptNotice.value = describeCipherNormalization(notes);
+
     const mk = keyToWords(decryptKey.value || 'SM4_DEFAULT_KEY!');
     const rk = sm4KeySchedule(mk);
     const ivWord = decryptMode.value === 'CBC' ? ivToWords(decryptIv.value || 'SM4_DEFAULT_IV!!') : null;
 
     let cipherData: CryptoJS.lib.WordArray;
     try {
-      cipherData = inputFormat.value === 'Base64'
-        ? CryptoJS.enc.Base64.parse(decryptInput.value)
-        : CryptoJS.enc.Hex.parse(decryptInput.value);
+      cipherData = isBase64
+        ? CryptoJS.enc.Base64.parse(cipherText)
+        : CryptoJS.enc.Hex.parse(cipherText);
     } catch {
-      decryptError.value = '解密失败: 密文格式不正确';
+      decryptError.value = '解密失败: 密文格式不正确；若来自 URL，请确认它是完整且未被二次转义的';
       return;
     }
 

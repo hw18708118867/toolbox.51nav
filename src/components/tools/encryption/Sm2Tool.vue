@@ -41,7 +41,7 @@
       <!-- Tab 2: 解密 -->
       <template #tab-2>
         <div class="space-y-3">
-          <TextInput v-model="decryptInput" label="输入密文" placeholder="请输入要解密的密文 (Base64)" :rows="4" show-count />
+          <TextInput v-model="decryptInput" label="输入密文" placeholder="请输入要解密的密文 (Base64，支持从 URL 复制的 %2B 这类编码形式)" :rows="4" show-count />
           <div>
             <label class="text-xs font-medium mb-1 block" style="color: var(--color-text-secondary);">私钥 (Private Key)</label>
             <textarea v-model="decryptPrivateKey" placeholder="请输入或粘贴 SM2 私钥（Hex 格式）" class="tool-input w-full rounded-xl px-4 py-3 text-sm resize-y" :rows="3" />
@@ -52,6 +52,7 @@
             </button>
           </div>
           <ErrorAlert :message="decryptError" />
+          <NoticeAlert :message="decryptNotice" />
           <TextOutput v-model="decryptOutput" label="解密结果" :rows="4" />
         </div>
       </template>
@@ -66,6 +67,8 @@ import TextInput from '../../common/TextInput.vue';
 import TextOutput from '../../common/TextOutput.vue';
 import TabView from '../../common/TabView.vue';
 import ErrorAlert from '../../common/ErrorAlert.vue';
+import NoticeAlert from '../../common/NoticeAlert.vue';
+import { normalizeCipherInput, describeCipherNormalization } from '../../../lib/cipher-input';
 
 // ── Key Generation ──
 const keypair = reactive({ privateKey: '', publicKey: '' });
@@ -132,16 +135,20 @@ const decryptInput = ref('');
 const decryptPrivateKey = ref('');
 const decryptOutput = ref('');
 const decryptError = ref('');
+const decryptNotice = ref('');
 
 function decrypt() {
   decryptError.value = '';
+  decryptNotice.value = '';
   try {
     if (!decryptPrivateKey.value) {
       decryptError.value = '请输入私钥';
       return;
     }
-    // Decode Base64 input
-    const decoded = CryptoJS.enc.Utf8.stringify(CryptoJS.enc.Base64.parse(decryptInput.value));
+    // Decode Base64 input（外层容器是 Base64，等价 isBase64 = true）
+    const { value: cipherText, notes } = normalizeCipherInput(decryptInput.value, true);
+    decryptNotice.value = describeCipherNormalization(notes);
+    const decoded = CryptoJS.enc.Utf8.stringify(CryptoJS.enc.Base64.parse(cipherText));
 
     // Extract IV (first 32 hex chars = 16 bytes) and ciphertext
     const ivHex = decoded.substring(0, 32);
