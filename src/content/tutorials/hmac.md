@@ -6,8 +6,9 @@ description: "搞懂 HMAC（Hash-based Message Authentication Code）的核心�
 keywords: [HMAC, 消息认证码, HMAC-SHA256, JWT签名, API签名, webhook安全, ipad opad]
 author: 开发工具箱
 date: 2026-06-15
+updated: 2026-09-10
 phase: 1
-relatedTools: [sha256, sha512, jwt-decode, aes]
+relatedTools: [sha256, sha512, jwt, jwt-decode, aes, base64]
 relatedTutorials: [sha256, jwt-decode, aes]
 ---
 
@@ -53,6 +54,35 @@ final = H( (K' ⊕ opad) || inner )
 
 所以 HMAC-SHA256 的本质就是：**对消息做两次 SHA-256，但两次之间塞入了不同的密钥扰动**。
 
+<figure class="dg-figure" data-interval="2200" data-steps='[{"t":"输入密钥与消息","d":"准备共享密钥 K 和待认证的消息 m；K 只有收发双方知道，绝不随请求传输。"},{"t":"规整密钥长度","d":"若 K 比分组长度（SHA-256 为 64 字节）长就先哈希缩短，短则在右侧补 0，得到长度固定的 K′。"},{"t":"内层哈希","d":"把 K′ 与 ipad（64 个 0x36）逐字节异或得到面板，拼接消息 m 后做一次哈希 H，得到中间值 inner。"},{"t":"外层哈希","d":"把 K′ 与 opad（64 个 0x5c）逐字节异或得到面板，拼接 inner 后再做一次哈希 H。"},{"t":"输出 HMAC","d":"外层哈希的结果就是最终 HMAC。两次哈希之间夹着不同的密钥扰动，这就是它抗长度扩展的关键。"}]'>
+<svg viewBox="0 0 820 520" role="img" aria-label="HMAC 计算过程" text-anchor="middle" dominant-baseline="central">
+<defs><marker id="m1p" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path d="M0,0 L10,5 L0,10 Z" style="fill:var(--color-primary);fill-opacity:.85"/></marker></defs>
+<g class="dg-pop" data-step="0">
+<rect class="dg-box-p" x="300" y="28" width="220" height="44" rx="9"/><text class="dg-tb" x="410" y="50">密钥 K（共享）</text>
+<rect class="dg-box" x="560" y="28" width="180" height="44" rx="9"/><text class="dg-tb" x="650" y="50">消息 m</text><text class="dg-ts" x="650" y="68">待认证内容</text>
+</g>
+<g data-step="1" data-flow="1"><path class="dg-line-p" d="M410,72 V108" marker-end="url(#m1p)"/></g>
+<g class="dg-pop" data-step="1">
+<rect class="dg-box-a" x="300" y="110" width="220" height="44" rx="9"/><text class="dg-tb" x="410" y="132">K' 规整密钥</text><text class="dg-ts" x="410" y="150">长则哈希·短则补 0</text>
+</g>
+<g data-step="2" data-flow="1"><path class="dg-line-p" d="M410,154 V172 H155 V188" marker-end="url(#m1p)"/><path class="dg-line-p" d="M650,72 V232 H560" marker-end="url(#m1p)"/><path class="dg-line-p" d="M155,234 V252 H300" marker-end="url(#m1p)"/></g>
+<g class="dg-pop" data-step="2">
+<rect class="dg-box-a" x="40" y="190" width="230" height="44" rx="9"/><text class="dg-tb" x="155" y="212">K' ⊕ ipad 面板</text><text class="dg-ts" x="155" y="230">ipad = 64×0x36</text>
+<rect class="dg-box" x="300" y="270" width="260" height="46" rx="9"/><text class="dg-tb" x="430" y="292">内层哈希 H</text><text class="dg-ts" x="430" y="310">面板 || m → inner</text>
+</g>
+<g data-step="3" data-flow="1"><path class="dg-line-p" d="M410,154 V172 H665 V188" marker-end="url(#m1p)"/><path class="dg-line-p" d="M665,234 V332 H560" marker-end="url(#m1p)"/><path class="dg-line-p" d="M430,316 V348" marker-end="url(#m1p)"/></g>
+<g class="dg-pop" data-step="3">
+<rect class="dg-box-a" x="550" y="190" width="230" height="44" rx="9"/><text class="dg-tb" x="665" y="212">K' ⊕ opad 面板</text><text class="dg-ts" x="665" y="230">opad = 64×0x5c</text>
+<rect class="dg-box" x="300" y="350" width="260" height="46" rx="9"/><text class="dg-tb" x="430" y="372">外层哈希 H</text><text class="dg-ts" x="430" y="390">面板 || inner → HMAC</text>
+</g>
+<g data-step="4" data-flow="1"><path class="dg-line-p" d="M430,396 V438" marker-end="url(#m1p)"/></g>
+<g class="dg-pop" data-step="4">
+<rect class="dg-box-g" x="260" y="440" width="340" height="50" rx="9"/><text class="dg-tb" x="430" y="462">HMAC 输出</text><text class="dg-ts" x="430" y="480">两次哈希夹着不同密钥扰动，抗长度扩展</text>
+</g>
+</svg>
+<figcaption>图 1：HMAC 的两次哈希流程。密钥 K 先被规整成固定长度的 K'，分别和 ipad、opad 异或出两块面板；内层把「ipad 面板 ‖ 消息」哈希成 inner，外层再把「opad 面板 ‖ inner」哈希成最终 HMAC。点上面的「播放」可以看数据怎么一步步流动。</figcaption>
+</figure>
+
 ### ipad 和 opad 为什么是这两个数？
 
 0x36 和 0x5c 不是随便拍的。它们的汉明距离是 4——在二进制层面差得足够远，保证内层和外层哈希的初始状态完全不同。另外 0x36 XOR 0x5c = 0x6a，刚好也是个有足够差异的值。
@@ -64,6 +94,36 @@ final = H( (K' ⊕ opad) || inner )
 我在前面 SHA-256 的文章里提到过长度扩展攻击：知道了 `H(message)` 和 message 的长度，哪怕不知道 message 本身，也可以算出 `H(message || padding || extra)`。这对基于 Merkle-Damgard 结构的哈希算法（SHA-256、SHA-1、MD5 等）是通用漏洞。
 
 HMAC 用了双层哈希，让这个攻击彻底失效：外层哈希的输入是 `(K' ⊕ opad) || inner`，攻击者确实可以"扩展"外层哈希，但扩展出来的是 `H( (K' ⊕ opad) || inner || padding || extra )`——这跟正常的 HMAC 结构对不上。而且 K 是保密的，攻击者没办法构造有效的内层哈希。这就是 ipad/opad 这套"双保险"机制的威力。
+
+<figure class="dg-figure" data-interval="2200" data-steps='[{"t":"两种写法","d":"左边把密钥拼在消息前直接哈希；右边用标准 HMAC 做双层哈希。"},{"t":"攻击者已知什么","d":"基于 Merkle-Damgard 的哈希，只要知道 H(msg) 和 msg 长度，就能推算 H(msg || 填充 || 额外内容)。"},{"t":"朴素实现被破","d":"左边 secret 长度卡在分组边界时，攻击者在不知道 secret 的情况下也能算出合法扩展哈希，伪造通过。"},{"t":"HMAC 免疫","d":"右边外层哈希的输入是 K′ ⊕ opad 再拼接 inner，攻击者构造不出有效内层哈希，扩展结果和正常结构对不上。"},{"t":"结论","d":"永远用 HMAC 这类标准构造，别手写 secret 加 message 的哈希。绿：HMAC 安全；橙：朴素实现有长度扩展漏洞。"}]'>
+<svg viewBox="0 0 820 500" role="img" aria-label="朴素哈希与 HMAC 抗长度扩展对比" text-anchor="middle" dominant-baseline="central">
+<defs><marker id="m2" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path d="M0,0 L10,5 L0,10 Z" fill="currentColor" fill-opacity=".55"/></marker><marker id="m2p" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path d="M0,0 L10,5 L0,10 Z" style="fill:var(--color-primary);fill-opacity:.85"/></marker></defs>
+<g class="dg-pop" data-step="0">
+<rect class="dg-box-w" x="50" y="50" width="320" height="50" rx="9"/><text class="dg-tb" x="210" y="72">朴素实现</text><text class="dg-ts" x="210" y="90">SHA256(secret || message)</text>
+<rect class="dg-box-p" x="450" y="50" width="320" height="50" rx="9"/><text class="dg-tb" x="610" y="72">标准 HMAC</text><text class="dg-ts" x="610" y="90">双层哈希 + 密钥扰动</text>
+</g>
+<g data-step="1" data-flow="1"><path class="dg-line" d="M210,100 V138" marker-end="url(#m2)"/><path class="dg-line-p" d="M610,100 V138" marker-end="url(#m2p)"/></g>
+<g class="dg-pop" data-step="1">
+<rect class="dg-box-w" x="50" y="140" width="320" height="50" rx="9"/><text class="dg-tb" x="210" y="162">攻击者已知 H 与长度</text><text class="dg-ts" x="210" y="180">Merkle-Damgard 可扩展</text>
+<rect class="dg-box-p" x="450" y="140" width="320" height="50" rx="9"/><text class="dg-tb" x="610" y="162">攻击者同样已知 H 与长度</text><text class="dg-ts" x="610" y="180">但密钥 K 保密</text>
+</g>
+<g data-step="2" data-flow="1"><path class="dg-line" d="M210,190 V228" marker-end="url(#m2)"/><path class="dg-line-p" d="M610,190 V228" marker-end="url(#m2p)"/></g>
+<g class="dg-pop" data-step="2">
+<rect class="dg-box-w" x="50" y="230" width="320" height="50" rx="9"/><text class="dg-tb" x="210" y="252">可伪造扩展哈希</text><text class="dg-ts" x="210" y="270">无需知道 secret 也能算</text>
+<rect class="dg-box-p" x="450" y="230" width="320" height="50" rx="9"/><text class="dg-tb" x="610" y="252">无法构造内层哈希</text><text class="dg-ts" x="610" y="270">扩展结果结构对不上</text>
+</g>
+<g data-step="3" data-flow="1"><path class="dg-line" d="M210,280 V318" marker-end="url(#m2)"/><path class="dg-line-p" d="M610,280 V318" marker-end="url(#m2p)"/></g>
+<g class="dg-pop" data-step="3">
+<rect class="dg-box-w" x="50" y="320" width="320" height="50" rx="9"/><text class="dg-tb" x="210" y="342">✗ 签名被伪造通过</text><text class="dg-ts" x="210" y="360">长度扩展攻击成功</text>
+<rect class="dg-box-g" x="450" y="320" width="320" height="50" rx="9"/><text class="dg-tb" x="610" y="342">✓ 免疫长度扩展</text><text class="dg-ts" x="610" y="360">双层哈希挡住攻击</text>
+</g>
+<g data-step="4" data-flow="1"><path class="dg-line" d="M210,370 V408" marker-end="url(#m2)"/><path class="dg-line-p" d="M610,370 V408" marker-end="url(#m2p)"/></g>
+<g class="dg-pop" data-step="4">
+<rect class="dg-box-w" x="200" y="410" width="420" height="50" rx="9"/><text class="dg-tb" x="410" y="432">结论：用 HMAC，别手写 secret + message 哈希</text><text class="dg-ts" x="410" y="450">朴素实现对 SHA-256 仍有长度扩展风险</text>
+</g>
+</svg>
+<figcaption>图 2：朴素哈希 vs 标准 HMAC 抗长度扩展对比。左边把密钥拼在消息前直接哈希，攻击者在知道哈希值和长度时就能伪造扩展；右边 HMAC 的双层哈希让扩展结果和正常结构对不上，因此免疫。点上面的「播放」可以看左右两边各自的演化。</figcaption>
+</figure>
 
 ## 核心特性
 
@@ -126,6 +186,35 @@ Github、Stripe、微信支付——几乎所有提供回调的第三方服务�
 
 我之前在做一个内部监控系统的时候，对接了好几个第三方 webhook。一开始没太在意签名验证，觉得"HTTPS 就够了嘛"。后来一个安全审计的同事直接演示了一遍——他用 Burp Suite 做了个中间人，把回调的 payload 改了，我的服务端照单全收。加上 HMAC 验证之后这个攻击面才算堵上。
 
+<figure class="dg-figure" data-interval="2200" data-steps='[{"t":"平台持有 Secret","d":"你在平台后台配置一段随机的 Webhook Secret，只有你和平台知道，不随请求传输。"},{"t":"平台签名","d":"平台用 Secret 对请求体做 HMAC-SHA256，把结果放进 X-Signature 之类的请求头。"},{"t":"传输明文与 MAC","d":"请求体是明文，但随附一个 MAC。攻击者能改明文，却算不出合法的新 MAC。"},{"t":"你重算 MAC","d":"你的服务端用同一个 Secret 对收到的 Body 重算一遍 HMAC-SHA256。"},{"t":"恒定时间比对","d":"把重算的 MAC 和请求头里的 MAC 做恒定时间比较：一致才放行，不一致丢弃并报警。绿：验证通过；橙：被篡改。"}]'>
+<svg viewBox="0 0 820 500" role="img" aria-label="Webhook 的 HMAC 验证流程" text-anchor="middle" dominant-baseline="central">
+<defs><marker id="m3p" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path d="M0,0 L10,5 L0,10 Z" style="fill:var(--color-primary);fill-opacity:.85"/></marker></defs>
+<g class="dg-pop" data-step="0">
+<rect class="dg-box-a" x="300" y="28" width="220" height="44" rx="9"/><text class="dg-tb" x="410" y="50">Webhook Secret</text><text class="dg-ts" x="410" y="68">随机串·收发双方共有</text>
+</g>
+<g data-step="1" data-flow="1"><path class="dg-line-p" d="M410,72 V108" marker-end="url(#m3p)"/></g>
+<g class="dg-pop" data-step="1">
+<rect class="dg-box-p" x="300" y="110" width="220" height="44" rx="9"/><text class="dg-tb" x="410" y="132">平台：HMAC-SHA256 签名</text><text class="dg-ts" x="410" y="150">Secret 对请求体算 MAC</text>
+</g>
+<g data-step="2" data-flow="1"><path class="dg-line-p" d="M410,154 V180 H170 V198" marker-end="url(#m3p)"/><path class="dg-line-p" d="M410,154 V180 H670 V198" marker-end="url(#m3p)"/><text class="dg-ts" x="410" y="222" text-anchor="middle">经网络传输（明文 + MAC）</text></g>
+<g class="dg-pop" data-step="2">
+<rect class="dg-box" x="60" y="200" width="220" height="44" rx="9"/><text class="dg-tb" x="170" y="222">请求体（明文）</text><text class="dg-ts" x="170" y="240">可被中间人看到/篡改</text>
+<rect class="dg-box-a" x="560" y="200" width="220" height="44" rx="9"/><text class="dg-tb" x="670" y="222">MAC（签名）</text><text class="dg-ts" x="670" y="240">附带在请求头里</text>
+</g>
+<g data-step="3" data-flow="1"><path class="dg-line-p" d="M170,244 V270 H300" marker-end="url(#m3p)"/><path class="dg-line-p" d="M670,244 V348 H620" marker-end="url(#m3p)"/></g>
+<g class="dg-pop" data-step="3">
+<rect class="dg-box-p" x="300" y="290" width="220" height="44" rx="9"/><text class="dg-tb" x="410" y="312">你：重算 HMAC-SHA256</text><text class="dg-ts" x="410" y="330">对收到的 Body 用同 Secret</text>
+</g>
+<g data-step="4" data-flow="1"><path class="dg-line-p" d="M410,334 V358" marker-end="url(#m3p)"/><path class="dg-line-p" d="M340,404 V428 H270" marker-end="url(#m3p)"/><path class="dg-line-p" d="M480,404 V428 H550" marker-end="url(#m3p)"/></g>
+<g class="dg-pop" data-step="4">
+<rect class="dg-box-w" x="300" y="360" width="220" height="44" rx="9"/><text class="dg-tb" x="410" y="382">恒定时间比对</text><text class="dg-ts" x="410" y="400">timingSafeEqual</text>
+<rect class="dg-box-g" x="60" y="430" width="210" height="44" rx="9"/><text class="dg-tb" x="165" y="456">验证通过 ✓</text>
+<rect class="dg-box-w" x="550" y="430" width="210" height="44" rx="9"/><text class="dg-tb" x="655" y="456">被篡改 ✗</text>
+</g>
+</svg>
+<figcaption>图 3：Webhook 的 HMAC 验证流程。平台用共享 Secret 对请求体签名，请求体明文随附 MAC 传输；你的服务端用同一个 Secret 重算 MAC，再做恒定时间比对。一致才放行，否则视为被篡改。点上面的「播放」可以看整条链路。</figcaption>
+</figure>
+
 ### 4. API 请求签名
 
 很多开放 API（交易所的行情接口、银行的开放平台、云服务的 REST API）要求在每个请求里带上时间戳和一个 HMAC 签名。核心思路一样：
@@ -178,6 +267,17 @@ HMAC 的安全性上限和密钥长度强相关。如果你用的是一个 4 字
 | **典型场景** | 完整性校验 | API、JWT、Webhook | 证书、电子签名、区块链 |
 
 HMAC 和数字签名之间选哪个，核心看一个点：**签名方和验证方是不是同一个人/系统**。如果请求是你自己签、自己验（比如签发 JWT 给客户端然后自己再验证），HMAC 就够，性能也好。如果需要把签名发给第三方验证、还要证明"这个签名只能是你做的"（不可否认性），那就必须用非对称签名。
+
+## 配套工具
+
+本站这套哈希与认证工具可以配合本文动手验证：
+
+- [HMAC 计算工具](/tools/hashing/hmac)：选 SHA-256/512，填密钥和消息，直接看到 HMAC 结果，支持十六进制与 Base64 输出
+- [SHA-256 哈希](/tools/hashing/sha256)：单独看底层哈希，理解 HMAC 内部那两次 SHA-256 是怎么算的
+- [SHA-512 哈希](/tools/hashing/sha512)：高安全需求下的底层哈希
+- [JWT 创建/签名/验证](/tools/security/jwt)：HS256 本质就是 HMAC-SHA256，可现场签名与验签
+- [JWT 解码](/tools/encoding/jwt-decode)：快速查看一段 JWT 的 Header 与 Payload
+- [Base64 编解码](/tools/encoding/base64)：HMAC 结果常用十六进制或 Base64 表达，可用来对照
 
 ## 常见问题
 
