@@ -244,6 +244,7 @@ export const tools: ToolDefinition[] = [
   { id: 'base-detect', category: 'analysis', name: '编码检测', description: '自动检测文本编码类型', keywords: ['编码检测', '自动识别编码', '编码类型'], component: 'BaseDetectTool', icon: 'search', popular: false, phase: 3, related: ['charset-convert', 'frequency-analysis'], useCases: ['自动识别未知字符串是 Base64/Hex/URL 等哪种编码', '快速判断 CTF 题目中的编码层级', '解码前先检测编码类型避免试错'] },
   { id: 'charset-detect', category: 'analysis', name: '字符集检测', description: '检测文本字符集', keywords: ['字符集检测', '字符集识别'], component: 'CharsetDetectTool', icon: 'search', popular: false, phase: 3, related: ['charset-convert', 'base-detect'], useCases: ['自动检测文本是 UTF-8/GBK/Big5 哪种编码', '解决打开文件乱码时先检测编码', '批量检测文件的字符集统一转换'] },
   { id: 'binary-analysis', category: 'analysis', name: '二进制分析', description: '十六进制查看器/编辑器', keywords: ['二进制分析', 'Hex查看器', 'Hex编辑器', 'Hex dump'], component: 'BinaryAnalysisTool', icon: 'binary', popular: false, phase: 3, related: ['hex', 'base-detect'], useCases: ['以十六进制+ASCII 双栏查看二进制文件', '分析文件头魔数判断文件真实类型', '手动修改二进制文件的特定字节'] },
+  { id: 'social-password', category: 'security', name: '社工密码生成器', description: '根据姓名、生日、宠物等公开信息生成常见社工密码候选词表，用于安全意识评估与授权渗透测试', keywords: ['社工密码', '密码生成', '弱口令', '字典生成', 'CUPP', '口令猜解', 'social engineering', '社工库'], component: 'SocialPasswordTool', icon: 'social-password', popular: false, phase: 3, related: ['password-gen', 'password-strength', 'password-breach', 'jwt'], useCases: ['根据目标公开信息生成定向字典用于授权渗透测试', '评估员工/账号使用个人信息做密码的风险', '演示弱口令如何被社工信息轻易猜解', '为密码强度审计生成常见模式候选集'] },
 ];
 
 /** 获取指定分类的工具列表 */
