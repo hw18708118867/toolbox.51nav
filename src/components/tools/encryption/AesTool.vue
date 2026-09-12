@@ -15,6 +15,16 @@
             </div>
           </div>
           <div class="flex items-center gap-4">
+            <label class="text-xs font-medium" style="color: var(--color-text-secondary);">密钥/IV 编码</label>
+            <select v-model="keyEncoding" class="rounded-md border px-3 py-1.5 text-sm" >
+              <option value="Auto">自动</option>
+              <option value="Utf8">UTF-8</option>
+              <option value="Base64">Base64</option>
+              <option value="Hex">Hex</option>
+            </select>
+            <span class="text-xs" style="color: var(--color-text-secondary);">选择密钥与 IV 的编码方式（当它们经过 Base64/Hex 编码时）</span>
+          </div>
+          <div class="flex items-center gap-4">
             <label class="text-xs font-medium" style="color: var(--color-text-secondary);">模式</label>
             <select v-model="mode" class="rounded-md border px-3 py-1.5 text-sm" >
               <option value="CBC">CBC</option>
@@ -56,6 +66,16 @@
               <label class="text-xs font-medium mb-1 block" style="color: var(--color-text-secondary);">IV</label>
               <input v-model="decryptIv" type="text" placeholder="加密时使用的 IV" class="w-full rounded-md border px-3 py-2 text-sm focus:outline-none "  />
             </div>
+          </div>
+          <div class="flex items-center gap-4">
+            <label class="text-xs font-medium" style="color: var(--color-text-secondary);">密钥/IV 编码</label>
+            <select v-model="decryptKeyEncoding" class="rounded-md border px-3 py-1.5 text-sm" >
+              <option value="Auto">自动</option>
+              <option value="Utf8">UTF-8</option>
+              <option value="Base64">Base64</option>
+              <option value="Hex">Hex</option>
+            </select>
+            <span class="text-xs" style="color: var(--color-text-secondary);">选择密钥与 IV 的编码方式（当它们经过 Base64/Hex 编码时）</span>
           </div>
           <div class="flex items-center gap-4">
             <label class="text-xs font-medium" style="color: var(--color-text-secondary);">模式</label>
@@ -100,6 +120,7 @@ import { normalizeCipherInput, describeCipherNormalization } from '../../../lib/
 const encryptInput = ref('');
 const key = ref('');
 const iv = ref('');
+const keyEncoding = ref('Auto');
 const mode = ref('CBC');
 const padding = ref('Pkcs7');
 const outputFormat = ref('Base64');
@@ -110,6 +131,7 @@ const error = ref('');
 const decryptInput = ref('');
 const decryptKey = ref('');
 const decryptIv = ref('');
+const decryptKeyEncoding = ref('Auto');
 const decryptMode = ref('CBC');
 const inputFormat = ref('Base64');
 const decryptOutput = ref('');
@@ -136,11 +158,46 @@ function getPadding(name: string) {
   return paddings[name] || CryptoJS.pad.Pkcs7;
 }
 
+/** 自动判断密钥 / IV 的编码：
+ *  - 纯十六进制且长度为偶数 → Hex
+ *  - 形似 Base64（允许 JSON 转义的 \/ 这类字符）→ Base64
+ *  - 其它 → UTF-8（直接当文本转字节）
+ *  说明：形如 "mysecretkey1234" 的全字母数字串会优先判为 Base64，
+ *  若你的密钥确实是 UTF-8 明文且被误判，请手动选 UTF-8。 */
+function detectEncoding(value: string): string {
+  const v = value.trim();
+  if (!v) return 'Utf8';
+  if (/^[0-9a-fA-F]+$/.test(v) && v.length % 2 === 0) return 'Hex';
+  // 去掉 JSON 转义的 \ 后再判断是否为合法 Base64（长度需为 4 的倍数）
+  const cleaned = v.replace(/\\/g, '');
+  if (/^[A-Za-z0-9+/]+={0,2}$/.test(cleaned) && cleaned.length % 4 === 0 && cleaned.length > 0) {
+    return 'Base64';
+  }
+  return 'Utf8';
+}
+
+/** 按所选编码把密钥 / IV 解析为字节序列（WordArray）。
+ *  Auto：自动判断编码；UTF-8 直接当文本；Base64/Hex 先解码为原始字节。
+ *  Base64/Hex 中反斜杠是非法字符，几乎都来自「从 JSON 复制时 \/ 这类转义」，
+ *  直接剔除可避免密钥被静默改坏导致解密失败。 */
+function parseSecret(value: string, encoding: string): CryptoJS.lib.WordArray {
+  const enc = encoding === 'Auto' ? detectEncoding(value) : encoding;
+  const v = enc === 'Base64' || enc === 'Hex' ? value.replace(/\\/g, '') : value;
+  switch (enc) {
+    case 'Base64':
+      return CryptoJS.enc.Base64.parse(v);
+    case 'Hex':
+      return CryptoJS.enc.Hex.parse(v);
+    default:
+      return CryptoJS.enc.Utf8.parse(v);
+  }
+}
+
 function encrypt() {
   error.value = '';
   try {
-    const keyHex = CryptoJS.enc.Utf8.parse(key.value);
-    const ivHex = iv.value ? CryptoJS.enc.Utf8.parse(iv.value) : undefined;
+    const keyHex = parseSecret(key.value, keyEncoding.value);
+    const ivHex = iv.value ? parseSecret(iv.value, keyEncoding.value) : undefined;
     const encrypted = CryptoJS.AES.encrypt(encryptInput.value, keyHex, {
       mode: getMode(mode.value),
       padding: getPadding(padding.value),
@@ -156,8 +213,8 @@ function decrypt() {
   decryptError.value = '';
   decryptNotice.value = '';
   try {
-    const keyHex = CryptoJS.enc.Utf8.parse(decryptKey.value);
-    const ivHex = decryptIv.value ? CryptoJS.enc.Utf8.parse(decryptIv.value) : undefined;
+    const keyHex = parseSecret(decryptKey.value, decryptKeyEncoding.value);
+    const ivHex = decryptIv.value ? parseSecret(decryptIv.value, decryptKeyEncoding.value) : undefined;
     const isBase64 = inputFormat.value === 'Base64';
 
     const { value: cipherText, notes } = normalizeCipherInput(decryptInput.value, isBase64);
