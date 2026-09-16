@@ -53,17 +53,20 @@ const navLinks = [
 
     <!-- Right side -->
     <div class="flex items-center gap-1">
-      <a
-        href="/#tool-search"
-        class="hidden sm:flex items-center gap-2 px-3 py-2 rounded-xl text-[13px] font-medium no-underline transition-all duration-300"
-        style="color: var(--color-text-secondary);"
+      <button
+        id="global-search-trigger"
+        type="button"
+        class="flex items-center gap-2 px-3 py-2 rounded-xl text-[13px] font-medium no-underline transition-all duration-300 hover:opacity-80"
+        style="color: var(--color-text-secondary); background: transparent; border: 1px solid var(--glass-border);"
+        aria-label="搜索工具与教程"
       >
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
           <circle cx="11" cy="11" r="8" />
           <path d="m21 21-4.35-4.35" />
         </svg>
         <span class="hidden xl:inline">搜索</span>
-      </a>
+        <kbd id="gs-trigger-kbd" class="hidden md:inline-flex items-center justify-center text-[11px] px-1.5 py-0.5 rounded" style="border: 1px solid var(--glass-border); color: var(--color-text-muted);">⌘K</kbd>
+      </button>
 
       <ThemeToggle client:load />
 

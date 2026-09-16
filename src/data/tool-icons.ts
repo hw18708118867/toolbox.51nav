@@ -281,6 +281,8 @@ export const toolIcons: Record<string, IconDef> = {
   'linux-commands':    { bg: bg('security'), fg: S['terminal'] },
   'firewalld':          { bg: bg('security'), fg: S['firewall'] },
   'iptables':           { bg: bg('security'), fg: S['iptables'] },
+  'wireshark':          { bg: bg('security'), fg: `<path d="M11 37c3-15 14-23 23-23 5 0 8 5 5 12-3 7-13 9-20 9" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/><path d="M6 41q6-4 12 0t12 0t12 0" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round"/>` },
+  'tcpdump':            { bg: bg('security'), fg: `<rect x="8" y="11" width="32" height="26" rx="3" fill="none" stroke="white" stroke-width="2.5"/><path d="M14 19l4 4-4 4" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/><line x1="22" y1="27" x2="34" y2="27" stroke="white" stroke-width="2.5" stroke-linecap="round"/>` },
   'security-ports':    { bg: bg('security'), fg: compose('shield', 'globe') },
   'jwt':               { bg: bg('security'), fg: `<rect x="9" y="15" width="30" height="18" rx="4" fill="none" stroke="white" stroke-width="2.5"/><path d="M17 15v-3a7 7 0 0114 0v3" stroke="white" stroke-width="2.5" fill="none" stroke-linecap="round"/><circle cx="24" cy="24" r="2.5" fill="white"/>` },
   'social-password':   { bg: bg('security'), fg: `<circle cx="17" cy="19" r="5" fill="none" stroke="white" stroke-width="2.5"/><path d="M9 36c0-4.5 3.5-7.5 8-7.5s8 3 8 7.5" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round"/><circle cx="34" cy="24" r="4" fill="none" stroke="white" stroke-width="2.5"/><path d="M38 24h3M37 20l3 4-3 4" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" fill="none"/>` },
