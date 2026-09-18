@@ -5,7 +5,7 @@ import Sidebar from '../components/layout/Sidebar.astro';
 import Breadcrumb from '../components/layout/Breadcrumb.astro';
 import AdSlot from '../components/layout/AdSlot.astro';
 import { categories } from '../data/categories';
-import type { ToolDefinition } from '../data/tools-registry';
+import { getToolById, type ToolDefinition } from '../data/tools-registry';
 
 interface Props {
   tool: ToolDefinition;
@@ -31,7 +31,9 @@ const jsonLd = {
     "@type": "Offer",
     "price": "0",
     "priceCurrency": "CNY"
-  }
+  },
+  "image": "https://toolbox.51nav.com/og-default.png",
+  "inLanguage": "zh-CN"
 };
 
 const breadcrumbLd = {
@@ -44,11 +46,62 @@ const breadcrumbLd = {
     ...(b.href ? { item: new URL(b.href, Astro.site).href } : {}),
   })),
 };
+
+// 基于工具元数据动态生成每页独有的「常见问题」，丰富页面内容厚度（避免 200+ 工具页互相雷同）
+// 同时输出 FAQPage 结构化数据，争取 Google 富媒体结果
+function buildToolFaqs(t: ToolDefinition, cat: typeof categories[number]) {
+  const faqs: { q: string; a: string }[] = [];
+  faqs.push({
+    q: `什么是${t.name}？`,
+    a: `${t.name}是${cat.name}类在线工具。${t.description}所有处理都在你的浏览器本地完成，数据不会上传到服务器。`,
+  });
+  if (t.useCases && t.useCases.length) {
+    faqs.push({
+      q: `${t.name}适合哪些使用场景？`,
+      a: `常见使用场景包括：${t.useCases.join('；')}。`,
+    });
+  } else {
+    faqs.push({
+      q: `${t.name}适合哪些使用场景？`,
+      a: `当你需要进行${cat.name}相关的处理或转换时，可以直接在本页面操作，结果即时生成，无需安装任何软件。`,
+    });
+  }
+  const relatedNames = (t.related || [])
+    .map((id) => getToolById(id)?.name)
+    .filter(Boolean)
+    .slice(0, 2);
+  if (relatedNames.length) {
+    faqs.push({
+      q: `${t.name}和${relatedNames[0]}有什么区别？`,
+      a: `${t.name}与${relatedNames[0]}都属于${cat.name}类工具，但侧重点不同：${t.name}侧重于${t.description}${
+        relatedNames.length > 1 ? `；而${relatedNames[1]}面向不同的具体任务` : ''
+      }。可根据实际需求选择使用。`,
+    });
+  }
+  faqs.push({
+    q: `使用${t.name}需要联网或上传数据吗？`,
+    a: `不需要。本工具完全在浏览器本地运行，输入的数据仅在本机处理，不会上传到任何服务器，可以放心使用。`,
+  });
+  return faqs;
+}
+
+const faqs = buildToolFaqs(tool, category);
+
+const faqLd = {
+  '@context': 'https://schema.org',
+  '@type': 'FAQPage',
+  mainEntity: faqs.map((f) => ({
+    '@type': 'Question',
+    name: f.q,
+    acceptedAnswer: { '@type': 'Answer', text: f.a },
+  })),
+};
 ---
 
 <BaseLayout title={tool.name} description={tool.description} keywords={tool.keywords.join(',')}>
   <script type="application/ld+json" set:html={JSON.stringify(jsonLd)} />
   <script type="application/ld+json" set:html={JSON.stringify(breadcrumbLd)} />
+  <script type="application/ld+json" set:html={JSON.stringify(faqLd)} />
 
   <div class="max-w-[1400px] mx-auto px-5 py-6">
     <Breadcrumb items={breadcrumbItems} />
@@ -74,6 +127,22 @@ const breadcrumbLd = {
         <div class="mt-6" style="color: var(--color-text);">
           <slot name="description" />
         </div>
+
+        <!-- 每页独有的常见问题：基于工具元数据动态生成，提升内容厚度 -->
+        <section class="mt-6" style="color: var(--color-text);">
+          <h2 class="text-lg font-bold mb-3 flex items-center gap-2" style="color: var(--color-text);">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+            关于 {tool.name} 的常见问题
+          </h2>
+          <div class="space-y-3">
+            {faqs.map((f) => (
+              <div class="rounded-xl p-4" style="background: var(--color-bg-tertiary);">
+                <p class="text-sm font-semibold mb-1.5" style="color: var(--color-text);">{f.q}</p>
+                <p class="text-sm leading-relaxed" style="color: var(--color-text-secondary);">{f.a}</p>
+              </div>
+            ))}
+          </div>
+        </section>
 
         <AdSlot slot="content-bottom" class="mt-6" />
       </div>

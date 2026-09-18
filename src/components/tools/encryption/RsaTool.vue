@@ -21,6 +21,10 @@
         <option value="reverse">reverse（小端）</option>
       </select>
     </div>
+    <p v-if="rsaScheme !== 'NONE'" class="m-0 text-xs leading-relaxed" style="color: var(--color-text-muted);">
+      提示：PKCS#1 v1.5 / OAEP 填充含随机数，同一明文每次加密的密文都不同，与 JSEncrypt 等其他实现的密文无法逐字比对。
+      验证正确性请用「解密」标签页：粘贴密文 + 对应私钥，能解出原文即为正确。
+    </p>
     <TabView :tabs="['加密', '解密']">
       <template #tab-0>
         <div class="space-y-3">

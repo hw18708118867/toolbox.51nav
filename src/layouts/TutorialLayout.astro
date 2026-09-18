@@ -65,6 +65,8 @@ const jsonLd = {
   },
   "about": tool ? { "@type": "SoftwareApplication", "name": tool.name } : undefined,
   "keywords": data.keywords.join(','),
+  "image": "https://toolbox.51nav.com/og-default.png",
+  "inLanguage": "zh-CN",
 };
 
 const fullTitle = `${data.title} — 技术教程`;
