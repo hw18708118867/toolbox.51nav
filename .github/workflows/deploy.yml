@@ -37,9 +37,10 @@ jobs:
           PUBLIC_GSC_VERIFICATION: ${{ vars.PUBLIC_GSC_VERIFICATION }}
           PUBLIC_BAIDU_VERIFICATION: ${{ vars.PUBLIC_BAIDU_VERIFICATION }}
 
-      - name: Submit to search engines (百度推送 + Google/Bing ping)
+      - name: Submit to search engines (百度推送 + IndexNow)
         env:
           BAIDU_TOKEN: ${{ secrets.BAIDU_TOKEN }}
+          INDEXNOW_KEY: ${{ vars.INDEXNOW_KEY }}
         run: node scripts/submit-search-engines.mjs
 
       - name: Upload artifact
