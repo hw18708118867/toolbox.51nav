@@ -29,6 +29,10 @@ gtag('config', '${ga4Id}');` : '';
 
 // GSC 验证 — 从环境变量注入，留空则不输出
 const gscVerification = import.meta.env.PUBLIC_GSC_VERIFICATION || '';
+
+// 百度站长验证 — 从环境变量注入（HTML 标签验证方式中 meta 的 content 值，如 codeva-xxxxxxxx）
+// 留空则不输出
+const baiduVerification = import.meta.env.PUBLIC_BAIDU_VERIFICATION || '';
 ---
 
 <!doctype html>
@@ -60,6 +64,9 @@ const gscVerification = import.meta.env.PUBLIC_GSC_VERIFICATION || '';
 
     <!-- GSC 验证（通过环境变量 PUBLIC_GSC_VERIFICATION 注入） -->
     {gscVerification && <meta name="google-site-verification" content={gscVerification} />}
+
+    <!-- 百度站长验证（通过环境变量 PUBLIC_BAIDU_VERIFICATION 注入） -->
+    {baiduVerification && <meta name="baidu-site-verification" content={baiduVerification} />}
 
     <!-- Favicon -->
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />

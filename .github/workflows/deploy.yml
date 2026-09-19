@@ -35,6 +35,7 @@ jobs:
         env:
           PUBLIC_GA4_ID: ${{ vars.PUBLIC_GA4_ID }}
           PUBLIC_GSC_VERIFICATION: ${{ vars.PUBLIC_GSC_VERIFICATION }}
+          PUBLIC_BAIDU_VERIFICATION: ${{ vars.PUBLIC_BAIDU_VERIFICATION }}
 
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
