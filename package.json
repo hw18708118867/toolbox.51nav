@@ -8,7 +8,7 @@
     "build": "astro build",
     "preview": "astro preview",
     "astro": "astro",
-    "push:baidu": "node scripts/baidu-push.mjs"
+    "submit:se": "node scripts/submit-search-engines.mjs"
   },
   "dependencies": {
     "@astrojs/sitemap": "^3.7.3",
