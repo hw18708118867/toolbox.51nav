@@ -1,5 +1,6 @@
 ---
 import ToolLayout from '../../../layouts/ToolLayout.astro';
+import AnimatedIcon from '../../../components/common/AnimatedIcon.astro';
 import { categories } from '../../../data/categories';
 import { getToolById, getToolsByCategory } from '../../../data/tools-registry';
 import { getCollection } from 'astro:content';
@@ -8,20 +9,50 @@ export async function getStaticPaths() {
   const tutorials = await getCollection('tutorials');
   const tutorialMap = new Map(tutorials.map(t => [t.data.toolId, t]));
 
+  // 反向关联：根据教程的 relatedTools，找出「引用了每个工具」的所有教程。
+  // 这样像 encoding-history 这种「概念总览」教程（toolId 不等于任何工具 id），
+  // 也能在它关联的 8 个编码工具页上被正确回链。
+  const toolToTutorials = new Map<string, any[]>();
+  for (const t of tutorials) {
+    for (const relatedToolId of (t.data.relatedTools || [])) {
+      if (!toolToTutorials.has(relatedToolId)) toolToTutorials.set(relatedToolId, []);
+      toolToTutorials.get(relatedToolId)!.push(t);
+    }
+  }
+
   const paths: any[] = [];
   for (const cat of categories) {
     const tools = getToolsByCategory(cat.id);
     for (const tool of tools) {
+      const relatedTutorials = (toolToTutorials.get(tool.id) || [])
+        .filter((t) => t.data.toolId !== tool.id); // 排除「本身就是该工具主教程」的那篇，避免重复
       paths.push({
         params: { category: cat.id, tool: tool.id },
-        props: { tool, category: cat, tutorial: tutorialMap.get(tool.id) || null },
+        props: { tool, category: cat, tutorial: tutorialMap.get(tool.id) || null, relatedTutorials },
       });
     }
   }
   return paths;
 }
 
-const { tool, category, tutorial } = Astro.props;
+const { tool, category, tutorial, relatedTutorials = [] } = Astro.props;
+
+// 相关工具卡片数据（过滤掉注册表中不存在的 id）
+const relatedToolsList = (tool.related || [])
+  .map((id: string) => getToolById(id))
+  .filter(Boolean);
+
+// 统一的「相关教程」卡片：本工具的主教程在前，被 relatedTools 反向引用的教程（如编码总览）在后
+const tutorialCards = [
+  ...(tutorial
+    ? [{ toolId: tutorial.data.toolId, title: tutorial.data.title, description: tutorial.data.description }]
+    : []),
+  ...relatedTutorials.map((t) => ({
+    toolId: t.data.toolId,
+    title: t.data.title,
+    description: t.data.description,
+  })),
+];
 ---
 
 <ToolLayout tool={tool} category={category}>
@@ -57,45 +88,61 @@ const { tool, category, tutorial } = Astro.props;
           </>
         )
       }
-      <h3 class="text-sm font-bold mb-2 flex items-center gap-1.5" style="color: var(--color-text);">
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>
-        相关工具
-      </h3>
-      <div class="flex flex-wrap gap-2">
-        {(tool.related || []).map((relatedId: string) => {
-          const relatedTool = getToolById(relatedId);
-          if (!relatedTool) return null;
-          return (
-            <a href={`/tools/${relatedTool.category}/${relatedTool.id}`}
-               class="text-xs px-3 py-1.5 rounded-xl no-underline transition-all duration-300 hover:scale-105"
-               style="background: var(--glass-light); color: var(--color-text-secondary);">
-              {relatedTool.name}
-            </a>
-          );
-        })}
-      </div>
-
-      <!-- Tutorial CTA -->
-      {tutorial && (
-        <div class="mt-4 p-4 rounded-xl flex items-start gap-3 border" style="border-color: var(--color-primary-light); background: var(--color-primary-light);">
-          <div class="w-9 h-9 rounded-lg flex items-center justify-center shrink-0 mt-0.5" style="background: var(--color-primary);">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5">
-              <path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/>
-              <path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/>
-            </svg>
+      {relatedToolsList.length > 0 && (
+        <>
+          <h3 class="text-sm font-bold mb-2 flex items-center gap-1.5" style="color: var(--color-text);">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>
+            相关工具
+          </h3>
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+            {relatedToolsList.map((rt) => (
+              <a href={`/tools/${rt.category}/${rt.id}`}
+                 class="flex items-center gap-3 p-3 rounded-xl no-underline transition-all duration-300 hover:scale-[1.02]"
+                 style="background: var(--glass-light); border: 1px solid var(--color-border);">
+                <AnimatedIcon toolId={rt.id} categoryFallback={rt.category} size={30} />
+                <div class="flex-1 min-w-0">
+                  <p class="text-[13px] font-semibold leading-tight" style="color: var(--color-text);">{rt.name}</p>
+                  <p class="text-xs mt-0.5 leading-snug" style="color: var(--color-text-muted); display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;">{rt.description}</p>
+                </div>
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" class="shrink-0" style="color: var(--color-text-muted);"><polyline points="9 18 15 12 9 6"/></svg>
+              </a>
+            ))}
           </div>
-          <div class="flex-1 min-w-0">
-            <p class="text-sm font-semibold mb-0.5" style="color: var(--color-text);">深入了解 {tool.name} 的技术原理</p>
-            <p class="text-xs mb-2" style="color: var(--color-text-muted);">{tutorial.data.description}</p>
-            <a href={`/tutorials/${tool.id}`}
-               class="inline-flex items-center gap-1 text-xs font-medium px-3 py-1.5 rounded-lg no-underline text-white transition-all duration-300 hover:opacity-90"
-               style="background: var(--color-primary);">
-              查看完整教程
-              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="9 18 15 12 9 6"/></svg>
-            </a>
+        </>
+      )}
+
+      {/* 相关教程：主教程 + 被反向引用的教程，统一为卡片样式 */}
+      {tutorialCards.length > 0 && (
+        <div class="mt-5">
+          <h3 class="text-sm font-bold mb-2 flex items-center gap-1.5" style="color: var(--color-text);">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>
+            相关教程
+          </h3>
+          <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2.5">
+            {tutorialCards.map((t) => (
+              <a href={`/tutorials/${t.toolId}`}
+                 class="flex items-start gap-2.5 p-3.5 rounded-xl no-underline border transition-all duration-300 hover:scale-[1.02]"
+                 style="border-color: var(--color-primary-light); background: var(--color-primary-light);">
+                <div class="w-8 h-8 rounded-lg flex items-center justify-center shrink-0 mt-0.5" style="background: var(--color-primary);">
+                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5">
+                    <path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/>
+                    <path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/>
+                  </svg>
+                </div>
+                <div class="flex-1 min-w-0">
+                  <p class="text-[13px] font-semibold mb-1 leading-snug" style="color: var(--color-text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">{t.title}</p>
+                  <p class="text-xs mb-2 leading-snug" style="color: var(--color-text-muted); display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;">{t.description}</p>
+                  <span class="inline-flex items-center gap-1 text-xs font-medium px-2.5 py-1 rounded-lg text-white transition-all duration-300 hover:opacity-90" style="background: var(--color-primary);">
+                    查看完整教程
+                    <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="9 18 15 12 9 6"/></svg>
+                  </span>
+                </div>
+              </a>
+            ))}
           </div>
         </div>
       )}
+
     </div>
   </div>
 </ToolLayout>
