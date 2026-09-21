@@ -57,7 +57,11 @@ const pageDesc = '深入理解各种开发工具背后的技术原理：编码�
       <div class="tutorials-grid" id="tutorial-grid" data-reveal>
         {sortedTutorials.map((t, i) => {
           const cat = categories.find((c) => c.id === t.data.category);
-          const readingTime = Math.max(1, Math.ceil(1500 / 400)); // ~5 min fallback
+          // Reading time: Chinese chars + English words, ~400 per minute (same as TutorialLayout)
+          const body = t.body ?? '';
+          const chineseChars = (body.match(/[一-鿿]/g) || []).length;
+          const englishWords = (body.match(/[a-zA-Z]+/g) || []).length;
+          const readingTime = Math.max(1, Math.ceil((chineseChars + englishWords) / 400));
           return (
             <a
               href={`/tutorials/${t.data.toolId}`}

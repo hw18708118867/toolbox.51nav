@@ -123,7 +123,7 @@ UTF-8 最后赢了，是因为它最聪明：英文字母还是 1 个字节，�
    10  + 101101 →  1010 1101  →  AD
 ```
 
-于是「中」的 UTF-8 字节就是 `E4 B8 AD`——和 [UTF-8 编码](https://toolbox.51nav.com/tools/encoding/utf8) 工具算出来的一模一样。注意那个切法：16 位被分成「4 + 6 + 6」，分别填进模板里预留的 `x` 空位。这就是为什么「中文占 3 字节」——不是拍脑袋定的，而是码点落在那个区间，模板就强制它用 3 个字节。
+于是「中」的 UTF-8 字节就是 `E4 B8 AD`——和 [UTF-8 编码](/tools/encoding/utf8) 工具算出来的一模一样。注意那个切法：16 位被分成「4 + 6 + 6」，分别填进模板里预留的 `x` 空位。这就是为什么「中文占 3 字节」——不是拍脑袋定的，而是码点落在那个区间，模板就强制它用 3 个字节。
 
 ## 字符到底怎么变成 0 和 1
 
@@ -157,7 +157,7 @@ UTF-8 最后赢了，是因为它最聪明：英文字母还是 1 个字节，�
 <figcaption>图：字符「中」变成二进制的过程。人看到的字符先查 Unicode 码点，再按 UTF-8 编码成字节，最后展开成 0/1 存进计算机。点上面的「播放」可以看每一步。</figcaption>
 </figure>
 
-想亲手看这一步步怎么走的，把「中」粘进 [UTF-8 编码](https://toolbox.51nav.com/tools/encoding/utf8) 工具，它会把码点、字节、二进制同时列出来；想看任意文字的码点，用 [Unicode 编码](https://toolbox.51nav.com/tools/encoding/unicode) 工具。
+想亲手看这一步步怎么走的，把「中」粘进 [UTF-8 编码](/tools/encoding/utf8) 工具，它会把码点、字节、二进制同时列出来；想看任意文字的码点，用 [Unicode 编码](/tools/encoding/unicode) 工具。
 
 ### 顺带回答开头那个问题
 
@@ -211,7 +211,7 @@ EF BB BF  →  按 GBK 解  →  「锘?»
 
 `EF BB` 被解成「锘」，`BF` 解成个问号样的小字——开头的「锘?」怪象就这么冒出来的。所以：跨平台、做 Web 时，**永远保存成「UTF-8 无 BOM」**，能避开一大半这类怪事。BOM 这东西，在 UTF-16/UTF-32 里是用来标字节序的（大端小端），但 UTF-8 字节序固定，BOM 纯属多余，反而常在 HTML 顶部顶出一块莫名空白、甚至弄坏 JSON。
 
-救法也简单：只要你晓得它「本来是用什么编码存的」，拿正确的规则重新解码就行。这正是 [字符编码转换](https://toolbox.51nav.com/tools/encoding/charset-convert) 工具的活儿——选对源编码和目标编码（比如 GBK → UTF-8），乱码当场还原。
+救法也简单：只要你晓得它「本来是用什么编码存的」，拿正确的规则重新解码就行。这正是 [字符编码转换](/tools/encoding/charset-convert) 工具的活儿——选对源编码和目标编码（比如 GBK → UTF-8），乱码当场还原。
 
 ## 你平时用的那些「编码」，其实不是一回事
 
@@ -222,15 +222,15 @@ EF BB BF  →  按 GBK 解  →  「锘?»
 
 后者是工具箱里最常见的一类，挨个说：
 
-**Hex（十六进制）**——把每个字节拆成两个 `0~9 A~F` 的字符。`E4` 就是一个字节的「人话写法」，常用来直接看二进制长什么样，比如分析协议包、查哈希。见 [Hex 编码](https://toolbox.51nav.com/tools/encoding/hex)。
+**Hex（十六进制）**——把每个字节拆成两个 `0~9 A~F` 的字符。`E4` 就是一个字节的「人话写法」，常用来直接看二进制长什么样，比如分析协议包、查哈希。见 [Hex 编码](/tools/encoding/hex)。
 
-**Binary（二进制）**——把每个字节写成 8 个 `0/1`，最贴近计算机本质，常用来做教学演示。见 [二进制编码](https://toolbox.51nav.com/tools/encoding/binary)。
+**Binary（二进制）**——把每个字节写成 8 个 `0/1`，最贴近计算机本质，常用来做教学演示。见 [二进制编码](/tools/encoding/binary)。
 
-**Base64**——每 3 个字节变成 4 个可打印字符（用 `A~Z a~z 0~9 + /` 这 64 个），专门把任意二进制塞进只认文本的场合：邮件附件、Data URI 内嵌图片、JWT 载荷。提醒一句，它**不是加密**，只是换写法；而且 3 字节变 4 字符意味着数据会膨胀大约 33%，这是它为兼容性付的代价。见 [Base64 编码](https://toolbox.51nav.com/tools/encoding/base64)。
+**Base64**——每 3 个字节变成 4 个可打印字符（用 `A~Z a~z 0~9 + /` 这 64 个），专门把任意二进制塞进只认文本的场合：邮件附件、Data URI 内嵌图片、JWT 载荷。提醒一句，它**不是加密**，只是换写法；而且 3 字节变 4 字符意味着数据会膨胀大约 33%，这是它为兼容性付的代价。见 [Base64 编码](/tools/encoding/base64)。
 
-**URL 编码（百分号编码）**——把 URL 里不能直接出现的字符（空格、`&`、`=`、中文等）变成 `%XX`。那个 `%` 后面跟的是该字符 UTF-8 字节的十六进制：空格 `20` 变 `%20`，「中」的字节 `E4 B8 AD` 变 `%E4%B8%AD`。没它，URL 早被特殊字符搞崩了。见 [URL 编码](https://toolbox.51nav.com/tools/encoding/url-encode)。
+**URL 编码（百分号编码）**——把 URL 里不能直接出现的字符（空格、`&`、`=`、中文等）变成 `%XX`。那个 `%` 后面跟的是该字符 UTF-8 字节的十六进制：空格 `20` 变 `%20`，「中」的字节 `E4 B8 AD` 变 `%E4%B8%AD`。没它，URL 早被特殊字符搞崩了。见 [URL 编码](/tools/encoding/url-encode)。
 
-**HTML 实体**——把 `<`、`>`、`&` 变成 `&lt;`、`&gt;`、`&amp;`，防浏览器把它们当标签，顺带挡掉 XSS。见 [HTML 实体编码](https://toolbox.51nav.com/tools/encoding/html-entity)。
+**HTML 实体**——把 `<`、`>`、`&` 变成 `&lt;`、`&gt;`、`&amp;`，防浏览器把它们当标签，顺带挡掉 XSS。见 [HTML 实体编码](/tools/encoding/html-entity)。
 
 一句话拎清：**charset 管「字怎么变字节」，表示法管「字节怎么变好看的字符串」**。两者还能叠着用——一份 UTF-8 文本，可以先 Base64 一遍塞进邮件，收件方再 Base64 解回字节、按 UTF-8 解出字。
 
@@ -239,9 +239,9 @@ EF BB BF  →  按 GBK 解  →  「锘?»
 几条能落地的：
 
 1. **全程统一 UTF-8**：源码文件、数据库连接串、HTTP 响应头、HTML 的 `<meta charset>`，全部显式写 UTF-8。绝大多数现代乱码，都是某一环偷偷用了别的编码。
-2. **看到乱码先猜「它本来是什么」**：来源若是 GBK 老系统，别拿 UTF-8 硬读，直接用 [字符编码转换](https://toolbox.51nav.com/tools/encoding/charset-convert) 转成 UTF-8。
-3. **排查时看字节**：把疑似乱码的内容粘进 [UTF-8 编码](https://toolbox.51nav.com/tools/encoding/utf8) 或 [Hex 编码](https://toolbox.51nav.com/tools/encoding/hex)，看底层字节到底是 `E4 B8 AD` 还是 `D6 D0`，一眼就能判断原始编码。
-4. **传二进制用 Base64 包一层**：图片、证书、JWT 这类，用 [Base64](https://toolbox.51nav.com/tools/encoding/base64) 最稳。
+2. **看到乱码先猜「它本来是什么」**：来源若是 GBK 老系统，别拿 UTF-8 硬读，直接用 [字符编码转换](/tools/encoding/charset-convert) 转成 UTF-8。
+3. **排查时看字节**：把疑似乱码的内容粘进 [UTF-8 编码](/tools/encoding/utf8) 或 [Hex 编码](/tools/encoding/hex)，看底层字节到底是 `E4 B8 AD` 还是 `D6 D0`，一眼就能判断原始编码。
+4. **传二进制用 Base64 包一层**：图片、证书、JWT 这类，用 [Base64](/tools/encoding/base64) 最稳。
 
 几个高发现场，单独拎出来说：
 
@@ -258,7 +258,7 @@ EF BB BF  →  按 GBK 解  →  「锘?»
 **A：**GBK 给每个汉字固定 2 字节；UTF-8 是变长，常用汉字落在基本平面区间，用 3 字节。同一「中」字，编码规则不同，字节数就不同。
 
 **Q：文件已经是 UTF-8 了，打开怎么还乱码？**
-**A：**常见两种情况：一是带了 BOM（文件头三个字节 `EF BB BF`），被某些解析器误读成「锘?»——用「UTF-8 无 BOM」重新保存即可；二是内容本来是用 GBK 存的，你却按 UTF-8 打开，先用 [字符编码转换](https://toolbox.51nav.com/tools/encoding/charset-convert) 试 GBK → UTF-8。
+**A：**常见两种情况：一是带了 BOM（文件头三个字节 `EF BB BF`），被某些解析器误读成「锘?»——用「UTF-8 无 BOM」重新保存即可；二是内容本来是用 GBK 存的，你却按 UTF-8 打开，先用 [字符编码转换](/tools/encoding/charset-convert) 试 GBK → UTF-8。
 
 **Q：Base64 是加密吗？**
 **A：**不是。它只是把字节换成可打印字符的「表示法」，不含任何密钥，谁都能瞬间解回原内容。它解决的是「传输 / 存储兼容」，不解决「保密」。
@@ -268,11 +268,11 @@ EF BB BF  →  按 GBK 解  →  「锘?»
 
 ## 相关工具
 
-- [字符编码转换](https://toolbox.51nav.com/tools/encoding/charset-convert)：GBK / GB2312 / Big5 / Shift-JIS 与 UTF-8 互转，修复乱码。
-- [UTF-8 编码](https://toolbox.51nav.com/tools/encoding/utf8)：查看字符的码点、UTF-8 字节与二进制，理解转换全链路。
-- [Unicode 编码](https://toolbox.51nav.com/tools/encoding/unicode)：中文与 `\uXXXX` 互转，处理 JSON / JS / Java 转义。
-- [Base64 编码 / 解码](https://toolbox.51nav.com/tools/encoding/base64)：文本与文件的 Base64 转换，支持 URL-safe 变体。
-- [Hex 编码](https://toolbox.51nav.com/tools/encoding/hex)：文本与十六进制字节互转，辅助逆向与协议分析。
-- [二进制编码](https://toolbox.51nav.com/tools/encoding/binary)：文本与 0/1 字符串互转，理解底层表示。
-- [URL 编码](https://toolbox.51nav.com/tools/encoding/url-encode)：百分号编码，处理 URL 中的中文与特殊字符。
-- [HTML 实体编码](https://toolbox.51nav.com/tools/encoding/html-entity)：`< > &` 与实体互转，防 XSS、安全展示代码。
+- [字符编码转换](/tools/encoding/charset-convert)：GBK / GB2312 / Big5 / Shift-JIS 与 UTF-8 互转，修复乱码。
+- [UTF-8 编码](/tools/encoding/utf8)：查看字符的码点、UTF-8 字节与二进制，理解转换全链路。
+- [Unicode 编码](/tools/encoding/unicode)：中文与 `\uXXXX` 互转，处理 JSON / JS / Java 转义。
+- [Base64 编码 / 解码](/tools/encoding/base64)：文本与文件的 Base64 转换，支持 URL-safe 变体。
+- [Hex 编码](/tools/encoding/hex)：文本与十六进制字节互转，辅助逆向与协议分析。
+- [二进制编码](/tools/encoding/binary)：文本与 0/1 字符串互转，理解底层表示。
+- [URL 编码](/tools/encoding/url-encode)：百分号编码，处理 URL 中的中文与特殊字符。
+- [HTML 实体编码](/tools/encoding/html-entity)：`< > &` 与实体互转，防 XSS、安全展示代码。

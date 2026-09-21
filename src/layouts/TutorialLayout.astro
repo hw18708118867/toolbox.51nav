@@ -31,9 +31,8 @@ const breadcrumbItems = [
 
 const tool = getToolById(data.toolId);
 
-// Estimate word count
-const renderedBody = await tutorial.render();
-const bodyText = String(renderedBody.Content);
+// Estimate word count (use raw markdown source; rendered Content is a component, not a string)
+const bodyText = tutorial.body ?? '';
 // Rough word count: Chinese chars + whitespace-separated words
 const chineseChars = (bodyText.match(/[一-鿿]/g) || []).length;
 const englishWords = (bodyText.match(/[a-zA-Z]+/g) || []).length;
