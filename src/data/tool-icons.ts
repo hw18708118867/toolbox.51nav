@@ -288,6 +288,7 @@ export const toolIcons: Record<string, IconDef> = {
   'social-password':   { bg: bg('security'), fg: `<circle cx="17" cy="19" r="5" fill="none" stroke="white" stroke-width="2.5"/><path d="M9 36c0-4.5 3.5-7.5 8-7.5s8 3 8 7.5" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round"/><circle cx="34" cy="24" r="4" fill="none" stroke="white" stroke-width="2.5"/><path d="M38 24h3M37 20l3 4-3 4" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" fill="none"/>` },
   'emergency-response': { bg: bg('security'), fg: `<path d="M24 5 L40 11 V23 C40 33 33 40 24 43 C15 40 8 33 8 23 V11 Z" fill="none" stroke="white" stroke-width="2.5" stroke-linejoin="round"/><line x1="24" y1="18" x2="24" y2="28" stroke="white" stroke-width="2.8" stroke-linecap="round"/><circle cx="24" cy="33" r="1.8" fill="white"/>` },
   'intranet-pentest': { bg: bg('security'), fg: `<rect x="8" y="14" width="14" height="20" rx="2" fill="none" stroke="white" stroke-width="2.5"/><rect x="26" y="14" width="14" height="20" rx="2" fill="none" stroke="white" stroke-width="2.5"/><line x1="22" y1="24" x2="26" y2="24" stroke="white" stroke-width="2.5" stroke-linecap="round"/><circle cx="24" cy="8" r="3" fill="none" stroke="white" stroke-width="2.5"/>` },
+  'windows-patch-audit': { bg: bg('security'), fg: compose('shield-alert', 'search') },
 
   // ═══ CONVERTER ═══
   'timestamp':         { bg: bg('converter'), fg: S['clock'] },
