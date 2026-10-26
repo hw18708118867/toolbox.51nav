@@ -58,7 +58,7 @@
             <span class="badge" :class="h.cve.type === 'RCE' ? 'badge-rce' : 'badge-eop'">{{ h.cve.type === 'RCE' ? '远程代码执行' : '权限提升' }}</span>
             <span v-if="h.cve.exploit" class="badge badge-exp">有公开 EXP</span>
           </div>
-          <p class="vuln-title">{{ h.cve.titleZh }} <span class="vuln-title-en">{{ h.cve.titleEn }}</span></p>
+          <p class="vuln-title">{{ h.cve.titleZh || h.cve.titleEn }} <span class="vuln-title-en" v-if="h.cve.titleZh && h.cve.titleEn">{{ h.cve.titleEn }}</span></p>
           <p class="vuln-note">{{ h.cve.note }}</p>
           <div class="fix-row">
             <div class="fix-kbs">
@@ -86,7 +86,7 @@
         <div class="db-stat"><span class="db-stat-num">{{ dbStats.total }}</span><span class="db-stat-lbl">总条目</span></div>
         <div class="db-stat"><span class="db-stat-num danger">{{ dbStats.eop }}</span><span class="db-stat-lbl">权限提升</span></div>
         <div class="db-stat"><span class="db-stat-num danger">{{ dbStats.rce }}</span><span class="db-stat-lbl">远程代码执行</span></div>
-        <div class="db-stat"><span class="db-stat-num danger">{{ dbStats.exploit }}</span><span class="db-stat-lbl">有公开 EXP</span></div>
+        <div class="db-stat"><span class="db-stat-num danger">{{ dbStats.server }}</span><span class="db-stat-lbl">影响 Server</span></div>
       </div>
       <div class="db-table-wrap">
         <table class="db-table">
@@ -111,12 +111,10 @@
     <div>
       <h3 class="section-title">④ 更新漏洞数据库</h3>
       <p class="hint">
-        内置为精选静态快照（仅含高影响、有公开利用的漏洞）。点「一键更新」可直接从内置源拉取，无需自己找地址；也可粘贴自定义数据库 JSON 地址拉取，或导入本地 JSON 文件。数据库格式与下方内置结构一致。
+        点下面的按钮，工具会直接从外部托管的快照源联网拉取最新发布的漏洞库（不再读取页内打包的内置库）。当前内置快照日期：<b class="db-date">{{ dbUpdated }}</b>。若网络不可达，点「恢复内置」使用离线库。
       </p>
       <div class="actions">
-        <input v-model="dbUrl" class="url-input" placeholder="可选：覆盖为自定义数据库 JSON 地址" />
-        <button class="btn-primary" @click="updateFromDefault">一键更新（内置源）</button>
-        <button class="btn-secondary" @click="updateFromUrl">从地址更新</button>
+        <button class="btn-primary" @click="updateFromDefault">更新漏洞数据库</button>
         <label class="btn-secondary file-btn">
           导入本地 JSON
           <input type="file" accept=".json,application/json" class="hidden-file" @change="onDbFile" />
@@ -138,6 +136,7 @@ import {
   DEFAULT_DB_URL,
   DB_UPDATED_DATE,
   type VulnEntry,
+  type VulnDbFile,
   type ParsedSystemInfo,
   type AuditResult,
 } from './windowsPatchAuditData';
@@ -156,7 +155,7 @@ const dbStats = computed(() => {
     total: list.length,
     eop: list.filter((v) => v.type === 'EoP').length,
     rce: list.filter((v) => v.type === 'RCE').length,
-    exploit: list.filter((v) => v.exploit).length,
+    server: list.filter((v) => v.osMatch.some((k) => k.includes('windows server'))).length,
   };
 });
 
@@ -165,6 +164,9 @@ const OS_LABEL_MAP: Record<string, string> = {
   'windows 11': 'Win11',
   'windows server 2019': 'Server 2019',
   'windows server 2022': 'Server 2022',
+  'windows server 2016': 'Server 2016',
+  'windows server 2012': 'Server 2012',
+  'windows 8.1': 'Win8.1',
   'windows server': 'Server 全系',
   'windows 7': 'Win7',
   'windows server 2008': 'Server 2008',
@@ -224,25 +226,38 @@ async function updateFromDefault() {
   await updateFromUrl();
 }
 
+// 兼容两种载荷：纯数组，或 { updated, entries }
+function normalizeDb(raw: unknown): { entries: VulnEntry[]; updated?: string } {
+  if (Array.isArray(raw)) return { entries: raw as VulnEntry[] };
+  if (raw && typeof raw === 'object' && Array.isArray((raw as VulnDbFile).entries)) {
+    const o = raw as VulnDbFile;
+    return { entries: o.entries, updated: o.updated };
+  }
+  return { entries: [] };
+}
+
 async function updateFromUrl() {
   const url = dbUrl.value.trim();
   if (!url) {
-    dbStatus.value = '未填写地址，请填写最新数据库 JSON 地址，或用「导入本地 JSON」。';
+    dbStatus.value = '未填写地址，请用「更新漏洞数据库」。';
     dbError.value = true;
     return;
   }
   try {
     const res = await fetch(url);
     if (!res.ok) throw new Error('HTTP ' + res.status);
-    const data = (await res.json()) as VulnEntry[];
-    if (!Array.isArray(data)) throw new Error('JSON 顶层应为漏洞数组');
-    db.value = data;
-    dbStatus.value = `已从地址更新，当前库含 ${data.length} 条漏洞。`;
+    const { entries, updated } = normalizeDb(await res.json());
+    if (!Array.isArray(entries) || entries.length === 0) throw new Error('数据库为空或格式不正确');
+    db.value = entries;
+    const when = updated ? `（快照日期 ${updated}）` : '';
+    dbStatus.value = `已从外部源更新，当前库含 ${entries.length} 条漏洞${when}。`;
     dbError.value = false;
     if (result.value) runAudit();
   } catch (err) {
     dbError.value = true;
-    dbStatus.value = '更新失败：' + (err instanceof Error ? err.message : String(err)) + '（可能是跨域限制或地址无效）';
+    dbStatus.value =
+      '更新失败：' + (err instanceof Error ? err.message : String(err)) +
+      '（跨域限制、地址无效或网络不可达；可点「恢复内置」用离线库）';
   }
 }
 
@@ -252,10 +267,11 @@ function onDbFile(e: Event) {
   const reader = new FileReader();
   reader.onload = () => {
     try {
-      const data = JSON.parse(String(reader.result || '[]')) as VulnEntry[];
-      if (!Array.isArray(data)) throw new Error('JSON 顶层应为漏洞数组');
-      db.value = data;
-      dbStatus.value = `已导入本地数据库，当前库含 ${data.length} 条漏洞。`;
+      const { entries, updated } = normalizeDb(JSON.parse(String(reader.result || '[]')));
+      if (!Array.isArray(entries) || entries.length === 0) throw new Error('JSON 顶层应为漏洞数组或 { entries }');
+      db.value = entries;
+      const when = updated ? `（快照日期 ${updated}）` : '';
+      dbStatus.value = `已导入本地数据库，当前库含 ${entries.length} 条漏洞${when}。`;
       dbError.value = false;
       if (result.value) runAudit();
     } catch (err) {
@@ -268,7 +284,7 @@ function onDbFile(e: Event) {
 
 function restoreDb() {
   db.value = [...vulnerabilityDb];
-  dbStatus.value = `已恢复内置数据库（${vulnerabilityDb.length} 条）。`;
+  dbStatus.value = `已恢复内置数据库（${vulnerabilityDb.length} 条，快照日期 ${DB_UPDATED_DATE}）。`;
   dbError.value = false;
   if (result.value) runAudit();
 }

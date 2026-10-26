@@ -289,6 +289,15 @@ export function audit(ctx: ParsedSystemInfo, db: VulnEntry[] = vulnerabilityDb):
 // 内置数据库快照更新时间（ISO 日期）。用于界面展示，帮助用户判断是否需要更新。
 export const DB_UPDATED_DATE = '2026-10-25';
 
-// 默认数据地址：站点同域托管的内置快照 JSON。与 public/windows-patch-audit-db.json 对应。
-// 同域请求无跨域问题，部署后必然可达，用户点「一键更新」即可拉取，无需自己找地址。
-export const DEFAULT_DB_URL = '/windows-patch-audit-db.json';
+// 外部数据源地址（raw.githubusercontent.com，跨域 CORS 开放）。
+// 注意：本工具是纯静态站点、没有后端，浏览器无法直连微软 MSRC 拉取实时数据；
+// 「更新」实际上是去拉取这个**外部托管的快照 JSON**（而非读取页内打包的内置库）。
+// 该文件与仓库同源维护，部署后必然可达，用户点「一键更新」即可联网获取最新发布的快照。
+export const DEFAULT_DB_URL =
+  'https://raw.githubusercontent.com/hw18708118867/toolbox.51nav/main/public/windows-patch-audit-db.json';
+
+// 外部数据源的载荷结构：带快照日期 + 漏洞数组，便于展示“这次拉到的是哪天的库”。
+export interface VulnDbFile {
+  updated?: string;
+  entries: VulnEntry[];
+}

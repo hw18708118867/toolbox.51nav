@@ -1,0 +1,37 @@
+name: Refresh Windows Patch Audit DB
+
+on:
+  schedule:
+    # 每周一 06:17 UTC 自动拉取 wesng 最新漏洞库并刷新内置快照
+    - cron: "17 6 * * 1"
+  workflow_dispatch: {}
+
+permissions:
+  contents: write
+
+jobs:
+  refresh:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Refresh database
+        run: python3 scripts/refresh_patch_db.py
+
+      - name: Commit changes
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add public/windows-patch-audit-db.json
+          if git diff --cached --quiet; then
+            echo "无变化，跳过提交"
+          else
+            git commit -m "chore: 自动刷新 Windows 补丁漏洞审计数据库"
+            git push
+          fi
